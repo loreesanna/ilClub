@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IL CLUB — Dashboard</title>
+  <link rel="stylesheet" href="./style/main.css">
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-mount"></div>
+
+  <div class="main-content">
+    <div class="topbar">
+      <button onclick="toggleSidebar()" style="display:none;background:none;border:none;color:var(--white);cursor:pointer;font-size:1.4rem" id="menu-btn">☰</button>
+      <span class="topbar-title">DASHBOARD</span>
+      <div class="topbar-actions">
+        <span id="today-date" style="font-size:.8rem;color:var(--muted)"></span>
+        <a href="login.html" class="btn btn-ghost btn-sm" id="login-btn">Accedi</a>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- Welcome banner -->
+      <div style="margin-bottom:2rem" class="fade-up">
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:.5rem">
+          <div style="width:3px;height:2rem;background:var(--gold);border-radius:2px"></div>
+          <h1 style="font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:4px;color:var(--white)" id="welcome-text">IL CLUB</h1>
+        </div>
+        <p style="font-size:.875rem;color:var(--muted);padding-left:1rem" id="welcome-sub">Caricamento...</p>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="stat-grid fade-up delay-1" id="stat-grid">
+        <div class="stat-card"><div class="stat-label">Caricamento...</div></div>
+      </div>
+
+      <!-- Charts row -->
+      <div class="grid-2 fade-up delay-2" style="margin-bottom:2rem">
+
+        <!-- Forma recente -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Forma recente</span>
+            <div class="results-strip" id="results-strip"></div>
+          </div>
+          <div class="bar-chart" id="monthly-chart"></div>
+        </div>
+
+        <!-- W/D/L donut -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Andamento stagione</span>
+            <span class="pill pill-gold" id="pts-pill">—</span>
+          </div>
+          <div class="donut-wrap">
+            <div class="donut">
+              <svg viewBox="0 0 120 120" width="120" height="120">
+                <circle cx="60" cy="60" r="48" fill="none" stroke="var(--surface2)" stroke-width="12"/>
+                <circle id="arc-w" cx="60" cy="60" r="48" fill="none" stroke="var(--green)"  stroke-width="12" stroke-dasharray="0 302"/>
+                <circle id="arc-d" cx="60" cy="60" r="48" fill="none" stroke="var(--gold)"   stroke-width="12" stroke-dasharray="0 302" stroke-dashoffset="0"/>
+                <circle id="arc-l" cx="60" cy="60" r="48" fill="none" stroke="var(--red)"    stroke-width="12" stroke-dasharray="0 302" stroke-dashoffset="0"/>
+              </svg>
+              <div class="donut-center">
+                <span class="donut-num" id="donut-num">—</span>
+                <span class="donut-lbl">Partite</span>
+              </div>
+            </div>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div><span>Vittorie: <strong id="leg-w">—</strong></span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div><span>Pareggi: <strong id="leg-d">—</strong></span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div><span>Sconfitte: <strong id="leg-l">—</strong></span></div>
+            </div>
+          </div>
+          <!-- Gol chart -->
+          <div style="margin-top:1.5rem">
+            <div class="bar-chart">
+              <div class="bar-row">
+                <span class="bar-label">Gol fatti</span>
+                <div class="bar-track"><div class="bar-fill green" id="bar-gf" style="width:0%"></div></div>
+                <span class="bar-val" id="val-gf">—</span>
+              </div>
+              <div class="bar-row">
+                <span class="bar-label">Gol subiti</span>
+                <div class="bar-track"><div class="bar-fill red" id="bar-ga" style="width:0%"></div></div>
+                <span class="bar-val" id="val-ga">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top scorers + Upcoming -->
+      <div class="grid-2 fade-up delay-3" style="margin-bottom:2rem">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Capocannonieri</span>
+            <a href="rosa.html" style="font-size:.75rem;color:var(--gold);text-decoration:none">Vedi rosa →</a>
+          </div>
+          <div id="top-scorers"><div style="padding:1rem;color:var(--muted);font-size:.85rem">Caricamento...</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Prossime partite</span>
+            <a href="partite.html" style="font-size:.75rem;color:var(--gold);text-decoration:none">Vedi tutte →</a>
+          </div>
+          <div id="upcoming-list"><div style="padding:1rem;color:var(--muted);font-size:.85rem">Caricamento...</div></div>
+        </div>
+      </div>
+
+      <!-- Ultimi risultati -->
+      <div class="fade-up delay-4">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Ultimi risultati</div>
+            <div class="section-subtitle" id="season-subtitle">—</div>
+          </div>
+          <a href="storico.html" class="btn btn-ghost btn-sm">Storico completo</a>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Casa</th>
+                <th>Risultato</th>
+                <th>Ospite</th>
+                <th>Competizione</th>
+                <th>Ris.</th>
+              </tr>
+            </thead>
+            <tbody id="results-table">
+              <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">Caricamento...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </div><!-- /main-content -->
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="./js/app.js"></script>
+<script src="./js/sidebar.js"></script>
+<script>
+const CIRC = 2 * Math.PI * 48; // ≈ 301.6
+
+// ---- Helpers rendering ----
+function renderStatsCards(stats) {
+  if (!stats) return;
+  const sg = document.getElementById('stat-grid');
+  const winRate = stats.played > 0 ? Math.round(stats.w / stats.played * 100) : 0;
+  const avgGoals = stats.played > 0 ? (stats.gf / stats.played).toFixed(1) : '—';
+  const gdSign = stats.gd >= 0 ? '+' : '';
+  const cards = [
+    { label:'Punti',      val: stats.pts,          sub:`${stats.played} partite giocate`,          badge:'badge-gold',  badgeTxt:`${stats.w*3}+${stats.d}` },
+    { label:'Vittorie',   val: stats.w,             sub:`${winRate}% win rate`,                     badge:'badge-green', badgeTxt:'↑' },
+    { label:'Gol segnati',val: stats.gf,            sub:`Media ${avgGoals} a partita`,              badge:'badge-blue',  badgeTxt:'GF' },
+    { label:'Diff. reti', val: `${gdSign}${stats.gd}`, sub:`${stats.gf} fatti · ${stats.ga} subiti`, badge: stats.gd >= 0 ? 'badge-green' : 'badge-red', badgeTxt: stats.gd >= 0 ? '↑' : '↓' },
+  ];
+  sg.innerHTML = cards.map(c => `
+    <div class="stat-card">
+      <div class="stat-label">${c.label}</div>
+      <div class="stat-value">${c.val}</div>
+      <div><span class="stat-badge ${c.badge}">${c.badgeTxt}</span></div>
+      <div class="stat-sub">${c.sub}</div>
+    </div>
+  `).join('');
+}
+
+function renderDonut(stats) {
+  if (!stats || stats.played === 0) return;
+  const total = CIRC;
+  const wSlice = (stats.w / stats.played) * total;
+  const dSlice = (stats.d / stats.played) * total;
+  const lSlice = (stats.l / stats.played) * total;
+  setTimeout(() => {
+    document.getElementById('arc-w').setAttribute('stroke-dasharray', `${wSlice} ${total}`);
+    const arcD = document.getElementById('arc-d');
+    arcD.setAttribute('stroke-dasharray', `${dSlice} ${total}`);
+    arcD.setAttribute('stroke-dashoffset', -wSlice);
+    const arcL = document.getElementById('arc-l');
+    arcL.setAttribute('stroke-dasharray', `${lSlice} ${total}`);
+    arcL.setAttribute('stroke-dashoffset', -(wSlice + dSlice));
+  }, 200);
+  document.getElementById('donut-num').textContent = stats.played;
+  document.getElementById('leg-w').textContent = stats.w;
+  document.getElementById('leg-d').textContent = stats.d;
+  document.getElementById('leg-l').textContent = stats.l;
+  document.getElementById('pts-pill').textContent = `${stats.pts} pts`;
+
+  const maxG = Math.max(stats.gf, stats.ga, 1);
+  setTimeout(() => {
+    document.getElementById('bar-gf').style.width = (stats.gf / maxG * 100) + '%';
+    document.getElementById('bar-ga').style.width = (stats.ga / maxG * 100) + '%';
+  }, 300);
+  document.getElementById('val-gf').textContent = stats.gf;
+  document.getElementById('val-ga').textContent = stats.ga;
+}
+
+function renderResultsStrip(results) {
+  const strip = document.getElementById('results-strip');
+  const last6 = [...results].slice(-6);
+  strip.innerHTML = last6.map(r => {
+    const home = r.home === 'Il Club';
+    const myG  = home ? r.gh : r.ga;
+    const oppG = home ? r.ga : r.gh;
+    const type = myG > oppG ? 'w' : myG === oppG ? 'd' : 'l';
+    return `<div class="result-dot rd-${type}">${type.toUpperCase()}</div>`;
+  }).join('');
+}
+
+function renderMonthlyChart(results) {
+  const months = {};
+  results.forEach(r => {
+    const m = new Date(r.date).toLocaleDateString('it-IT', { month: 'short' });
+    if (!months[m]) months[m] = { w: 0, d: 0, l: 0 };
+    const home = r.home === 'Il Club';
+    const myG  = home ? r.gh : r.ga;
+    const oppG = home ? r.ga : r.gh;
+    if (myG > oppG) months[m].w++;
+    else if (myG === oppG) months[m].d++;
+    else months[m].l++;
+  });
+  const mc = document.getElementById('monthly-chart');
+  if (Object.keys(months).length === 0) {
+    mc.innerHTML = '<div style="color:var(--muted);font-size:.8rem;padding:.5rem">Nessun dato disponibile</div>';
+    return;
+  }
+  mc.innerHTML = Object.entries(months).map(([m, v]) => {
+    const tot = v.w + v.d + v.l;
+    const wPct = Math.round(v.w / tot * 100);
+    return `
+    <div class="bar-row">
+      <span class="bar-label">${m}</span>
+      <div class="bar-track"><div class="bar-fill green" style="width:${wPct}%"></div></div>
+      <span class="bar-val">${v.w}V ${v.d}P ${v.l}S</span>
+    </div>`;
+  }).join('');
+}
+
+function renderTopScorers(players) {
+  const sorted   = [...players].sort((a, b) => b.goals - a.goals).slice(0, 5);
+  const maxGoals = sorted[0]?.goals || 1;
+  const ts = document.getElementById('top-scorers');
+  if (sorted.length === 0) {
+    ts.innerHTML = '<div style="color:var(--muted);font-size:.85rem;padding:1rem">Nessun dato</div>';
+    return;
+  }
+  ts.innerHTML = `<div class="bar-chart">${sorted.map((p, i) => `
+    <div class="bar-row">
+      <span class="bar-label" style="font-size:.78rem;color:var(--white)">${i + 1}. ${p.name.split(' ').pop()}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${p.goals / maxGoals * 100}%;transition-delay:${i * 0.08}s"></div></div>
+      <span class="bar-val">${p.goals}</span>
+    </div>`).join('')}</div>`;
+}
+
+function renderUpcoming(upcoming) {
+  const ul = document.getElementById('upcoming-list');
+  if (!upcoming || upcoming.length === 0) {
+    ul.innerHTML = '<div style="color:var(--muted);font-size:.85rem;padding:1rem">Nessuna partita programmata</div>';
+    return;
+  }
+  ul.innerHTML = upcoming.slice(0, 4).map(m => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-size:.8rem;font-weight:600;color:var(--white)">${m.home} <span style="color:var(--muted);font-weight:400">vs</span> ${m.away}</div>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:.2rem">${new Date(m.date).toLocaleDateString('it-IT', { day:'numeric', month:'short' })} · ${m.time}</div>
+      </div>
+      <div style="text-align:right">
+        <span class="pill ${m.venue === 'Casa' ? 'pill-blue' : 'pill-gray'}">${m.venue}</span>
+        <div style="font-size:.7rem;color:var(--muted);margin-top:.25rem">${m.comp}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderResultsTable(results) {
+  const rt = document.getElementById('results-table');
+  if (!results || results.length === 0) {
+    rt.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">Nessun risultato disponibile</td></tr>';
+    return;
+  }
+  rt.innerHTML = [...results].slice(-6).reverse().map(r => {
+    const home = r.home === 'Il Club';
+    const myG  = home ? r.gh : r.ga;
+    const oppG = home ? r.ga : r.gh;
+    const type = myG > oppG ? 'w' : myG === oppG ? 'd' : 'l';
+    const cls  = { w:'result-w', d:'result-d', l:'result-l' }[type];
+    const lbl  = { w:'V', d:'P', l:'S' }[type];
+    return `<tr>
+      <td style="color:var(--muted);font-size:.8rem">${new Date(r.date).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'2-digit' })}</td>
+      <td style="font-weight:${r.home === 'Il Club' ? '600' : '400'}">${r.home}</td>
+      <td><strong>${r.gh} — ${r.ga}</strong></td>
+      <td style="font-weight:${r.away === 'Il Club' ? '600' : '400'}">${r.away}</td>
+      <td><span class="pill pill-gray">${r.comp}</span></td>
+      <td><span class="${cls}">${lbl}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ---- Main load ----
+document.addEventListener('DOMContentLoaded', async () => {
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('it-IT', {
+    weekday:'long', day:'numeric', month:'long', year:'numeric'
+  });
+
+  await AUTH.init();
+  const lb = document.getElementById('login-btn');
+  if (AUTH.currentUser) {
+    lb.textContent = AUTH.currentUser.name;
+    lb.href = '#';
+    lb.onclick = () => AUTH.logout();
+    document.getElementById('welcome-text').textContent = `Ciao, ${AUTH.currentUser.name.split(' ')[0]}`;
+  }
+
+  try {
+    // Caricamento parallelo di tutti i dati
+    const [team, stats, results, players, upcoming] = await Promise.all([
+      DB.getTeam().catch(() => null),
+      DB.getStats().catch(() => null),
+      DB.getResults().catch(() => []),
+      DB.getPlayers().catch(() => []),
+      DB.getUpcoming().catch(() => []),
+    ]);
+
+    // Welcome subtitle con dati squadra
+    if (team) {
+      document.getElementById('welcome-sub').textContent =
+        `${team.name} · ${team.city} · Stagione corrente`;
+    }
+
+    // Sottotitolo tabella risultati
+    if (team) {
+      document.getElementById('season-subtitle').textContent = `Stagione corrente — ${team.name}`;
+    }
+
+    // Render components
+    if (stats)   renderStatsCards(stats);
+    if (stats)   renderDonut(stats);
+    if (results.length) renderResultsStrip(results);
+    if (results.length) renderMonthlyChart(results);
+    if (players.length) renderTopScorers(players);
+    renderUpcoming(upcoming);
+    renderResultsTable(results);
+
+  } catch (err) {
+    console.error('Errore caricamento dashboard:', err);
+    UI.toast('Impossibile connettersi al server. Verifica la configurazione API.', 'error');
+  }
+});
+
+function toggleSidebar() {
+  const s = document.getElementById('sidebar');
+  const o = document.getElementById('sidebar-overlay');
+  s.classList.toggle('open');
+  o.style.display = s.classList.contains('open') ? '' : 'none';
+}
+</script>
+</body>
+</html>
