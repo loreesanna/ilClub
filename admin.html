@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IL CLUB — Admin</title>
+  <link rel="stylesheet" href="./style/main.css">
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-mount"></div>
+  <div class="main-content">
+    <div class="topbar">
+      <span class="topbar-title">PANNELLO ADMIN</span>
+      <div class="topbar-actions">
+        <span class="pill pill-red">Admin Only</span>
+      </div>
+    </div>
+
+    <div class="page-content" id="admin-content" style="display:none">
+
+      <!-- Overview cards -->
+      <div class="stat-grid fade-up" id="overview-cards"></div>
+
+      <!-- User Management -->
+      <div class="fade-up delay-1" style="margin-bottom:2rem">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Gestione Utenti</div>
+            <div class="section-subtitle">Account registrati nel sistema</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openUserModal()">+ Aggiungi utente</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Username</th><th>Nome</th><th>Ruolo</th><th>Azioni</th></tr>
+            </thead>
+            <tbody id="users-table">
+              <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem">Caricamento...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Impostazioni squadra -->
+      <div class="card fade-up delay-2" style="margin-bottom:2rem">
+        <div class="card-header">
+          <span class="card-title">Impostazioni Squadra</span>
+        </div>
+        <div class="grid-2">
+          <div class="form-group"><label class="form-label">Nome squadra</label><input class="form-input" id="site-name" value="Il Club"></div>
+          <div class="form-group"><label class="form-label">Stagione corrente</label><input class="form-input" id="site-season" value="2024/25"></div>
+          <div class="form-group"><label class="form-label">Città</label><input class="form-input" id="site-city"></div>
+          <div class="form-group"><label class="form-label">Stadio</label><input class="form-input" id="site-stadium"></div>
+          <div class="form-group"><label class="form-label">Allenatore</label><input class="form-input" id="site-coach"></div>
+          <div class="form-group"><label class="form-label">Presidente</label><input class="form-input" id="site-president"></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveSiteSettings()">Salva impostazioni</button>
+      </div>
+
+      <!-- Danger zone -->
+      <div class="fade-up delay-3">
+        <div class="danger-zone">
+          <div class="danger-title">⚠ Zona Pericolosa</div>
+          <p style="font-size:.85rem;color:var(--muted);margin-bottom:1.25rem">Queste azioni sono irreversibili. Procedere con cautela.</p>
+          <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+            <button class="btn btn-danger" onclick="clearPlayers()">🗑 Svuota rosa</button>
+            <button class="btn btn-danger" onclick="clearResults()">🗑 Svuota risultati</button>
+            <button class="btn btn-danger" onclick="clearUpcoming()">🗑 Svuota calendario</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Access denied -->
+    <div class="page-content" id="denied-content" style="display:none">
+      <div style="text-align:center;padding:4rem 2rem">
+        <div style="font-size:4rem;margin-bottom:1rem">🔒</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:4px;color:var(--red);margin-bottom:.75rem">Accesso Negato</div>
+        <p style="color:var(--muted);margin-bottom:2rem">Questa sezione è riservata agli amministratori.</p>
+        <a href="index.html" class="btn btn-primary">← Torna alla Dashboard</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- User modal -->
+<div class="modal-overlay" id="user-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="user-modal-title">Nuovo Utente</span>
+      <button class="modal-close" onclick="closeUserModal()">✕</button>
+    </div>
+    <div>
+      <div class="form-group"><label class="form-label">Nome</label><input class="form-input" id="u-name"></div>
+      <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="u-username"></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" id="u-pass"></div>
+      <div class="form-group">
+        <label class="form-label">Ruolo</label>
+        <select class="form-select" id="u-role">
+          <option value="fan">Fan</option>
+          <option value="membro">Membro</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <p style="font-size:.75rem;color:var(--muted);margin-bottom:1rem">
+        L'utente riceverà le credenziali e potrà accedere subito.
+      </p>
+      <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:.5rem">
+        <button class="btn btn-ghost" onclick="closeUserModal()">Annulla</button>
+        <button class="btn btn-primary" onclick="saveUser()">Crea account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="./js/app.js"></script>
+<script src="./js/sidebar.js"></script>
+<script>
+let allProfiles = [];
+let teamData = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await AUTH.init();
+  if (!AUTH.can('admin')) {
+    document.getElementById('denied-content').style.display = '';
+    return;
+  }
+  document.getElementById('admin-content').style.display = '';
+  try {
+    [allProfiles, teamData] = await Promise.all([DB.getProfiles(), DB.getTeam()]);
+  } catch(e) {
+    UI.toast('Errore caricamento: ' + e.message, 'error');
+  }
+  renderOverview();
+  renderUsers();
+  loadTeamSettings();
+});
+
+async function renderOverview() {
+  try {
+    const [players, results, upcoming] = await Promise.all([
+      DB.getPlayers(), DB.getResults(), DB.getUpcoming()
+    ]);
+    let w=0,d=0,l=0;
+    results.forEach(r=>{
+      const home=r.home==='Il Club';
+      const myG=home?r.gh:r.ga;
+      const oppG=home?r.ga:r.gh;
+      if(myG>oppG)w++;else if(myG===oppG)d++;else l++;
+    });
+    const pts = w*3+d;
+    document.getElementById('overview-cards').innerHTML = [
+      { label:'Giocatori', val: players.length, badge:'badge-blue' },
+      { label:'Partite archiviate', val: results.length, badge:'badge-gold' },
+      { label:'Prossime gare', val: upcoming.length, badge:'badge-green' },
+      { label:'Punti stagione', val: pts, badge:'badge-gold' },
+    ].map(c=>`<div class="stat-card">
+      <div class="stat-label">${c.label}</div>
+      <div class="stat-value">${c.val}</div>
+      <span class="stat-badge ${c.badge}">${c.label}</span>
+    </div>`).join('');
+  } catch(e) {
+    document.getElementById('overview-cards').innerHTML = `<div style="color:var(--muted)">Impossibile caricare le statistiche</div>`;
+  }
+}
+
+function renderUsers() {
+  const roleColors = { admin:'pill-red', membro:'pill-gold', fan:'pill-blue' };
+  document.getElementById('users-table').innerHTML = allProfiles.map(u=>`
+    <tr>
+      <td style="color:var(--muted)">${u.id}</td>
+      <td><strong>${u.username}</strong></td>
+      <td>${u.name}</td>
+      <td><span class="pill ${roleColors[u.role]||'pill-gray'}">${u.role}</span></td>
+      <td>
+        <select class="form-select" style="width:120px;padding:.3rem .5rem;font-size:.75rem" onchange="changeRole(${u.id}, this.value)">
+          <option value="fan" ${u.role==='fan'?'selected':''}>Fan</option>
+          <option value="membro" ${u.role==='membro'?'selected':''}>Membro</option>
+          <option value="admin" ${u.role==='admin'?'selected':''}>Admin</option>
+        </select>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function changeRole(id, role) {
+  try {
+    await DB.updateProfile(id, { role });
+    const p = allProfiles.find(u => u.id === id);
+    if (p) { p.role = role; renderUsers(); }
+    UI.toast(`Ruolo aggiornato → ${role}`, 'success');
+  } catch(e) { UI.toast('Errore: ' + e.message, 'error'); }
+}
+
+function openUserModal() {
+  document.getElementById('u-name').value = '';
+  document.getElementById('u-username').value = '';
+  document.getElementById('u-pass').value = '';
+  document.getElementById('u-role').value = 'fan';
+  document.getElementById('user-modal').classList.add('open');
+}
+function closeUserModal() { document.getElementById('user-modal').classList.remove('open'); }
+
+async function saveUser() {
+  const name = document.getElementById('u-name').value.trim();
+  const username = document.getElementById('u-username').value.trim();
+  const pass = document.getElementById('u-pass').value;
+  const role = document.getElementById('u-role').value;
+  if (!name || !username || !pass) { UI.toast('Compila tutti i campi', 'error'); return; }
+  if (allProfiles.find(u => u.username === username)) { UI.toast('Username già in uso', 'error'); return; }
+  // Registra tramite Supabase Auth + profile
+  try {
+    const email = `${username}@ilclub.local`;
+    const data = await SB.signUp(email, pass);
+    if (data.error) { UI.toast(data.error.message || 'Errore creazione account', 'error'); return; }
+    const userId = data.user?.id || data.id;
+    const sessionToken = data.session?.access_token;
+    const savedToken = AUTH._sbToken;
+    if (sessionToken) AUTH._sbToken = sessionToken;
+    const profiles = await SB.post('profiles', { auth_id: userId, username, name, role });
+    AUTH._sbToken = savedToken;
+    if (profiles && profiles[0]) allProfiles.push(profiles[0]);
+    UI.toast(`Utente "${username}" creato come ${role}`, 'success');
+    closeUserModal();
+    renderUsers();
+  } catch(e) {
+    UI.toast('Errore: ' + e.message, 'error');
+  }
+}
+
+function loadTeamSettings() {
+  if (!teamData) return;
+  document.getElementById('site-name').value = teamData.name || '';
+  document.getElementById('site-city').value = teamData.city || '';
+  document.getElementById('site-stadium').value = teamData.stadium || '';
+  document.getElementById('site-coach').value = teamData.coach || '';
+  document.getElementById('site-president').value = teamData.president || '';
+}
+
+async function saveSiteSettings() {
+  const data = {
+    name: document.getElementById('site-name').value.trim(),
+    city: document.getElementById('site-city').value.trim(),
+    stadium: document.getElementById('site-stadium').value.trim(),
+    coach: document.getElementById('site-coach').value.trim(),
+    president: document.getElementById('site-president').value.trim(),
+  };
+  try {
+    await DB.updateTeam(data);
+    teamData = { ...teamData, ...data };
+    UI.toast('Impostazioni salvate', 'success');
+  } catch(e) { UI.toast('Errore: ' + e.message, 'error'); }
+}
+
+async function clearPlayers() {
+  UI.confirm('Svuotare tutta la rosa? Azione irreversibile!', async () => {
+    try {
+      const players = await DB.getPlayers();
+      for (const p of players) await DB.deletePlayer(p.id);
+      UI.toast('Rosa svuotata', 'info');
+      renderOverview();
+    } catch(e) { UI.toast('Errore: ' + e.message, 'error'); }
+  });
+}
+
+async function clearResults() {
+  UI.confirm('Eliminare tutti i risultati? Azione irreversibile!', async () => {
+    try {
+      const results = await DB.getResults();
+      for (const r of results) await DB.deleteResult(r.id);
+      UI.toast('Risultati eliminati', 'info');
+      renderOverview();
+    } catch(e) { UI.toast('Errore: ' + e.message, 'error'); }
+  });
+}
+
+async function clearUpcoming() {
+  UI.confirm('Svuotare il calendario partite? Azione irreversibile!', async () => {
+    try {
+      const upcoming = await DB.getUpcoming();
+      for (const u of upcoming) await DB.deleteUpcoming(u.id);
+      UI.toast('Calendario svuotato', 'info');
+      renderOverview();
+    } catch(e) { UI.toast('Errore: ' + e.message, 'error'); }
+  });
+}
+</script>
+</body>
+</html>
