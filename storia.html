@@ -89,7 +89,6 @@
       <div class="grid-2">
         <div class="form-group"><label class="form-label">Nome squadra</label><input class="form-input" id="i-name"></div>
         <div class="form-group"><label class="form-label">Anno fondazione</label><input class="form-input" id="i-founded" type="number"></div>
-        <div class="form-group"><label class="form-label">Stadio</label><input class="form-input" id="i-stadium"></div>
         <div class="form-group"><label class="form-label">Città</label><input class="form-input" id="i-city"></div>
         <div class="form-group"><label class="form-label">Colori</label><input class="form-input" id="i-colors"></div>
         <div class="form-group"><label class="form-label">Allenatore</label><input class="form-input" id="i-coach"></div>
@@ -132,10 +131,9 @@ function renderHero() {
   if (!t) return;
   document.getElementById('founded-bg').textContent = t.founded || '';
   document.getElementById('hero-name').textContent = t.name || 'IL CLUB';
-  document.getElementById('hero-info').textContent = `Football Society · Fondato nel ${t.founded||'—'} · ${t.city||'—'}`;
+  document.getElementById('hero-info').textContent = `Football Club · Fondato nel ${t.founded||'—'} · ${t.city||'—'}`;
   const infos = [
     { label:'Fondato', val: t.founded||'—' },
-    { label:'Stadio', val: t.stadium||'—' },
     { label:'Città', val: t.city||'—' },
     { label:'Colori', val: t.colors||'—' },
     { label:'Allenatore', val: t.coach||'—' },
@@ -225,7 +223,7 @@ async function deleteEvent(id) {
 
 function openInfoModal() {
   const t = teamData || {};
-  ['name','stadium','city','colors','coach','president'].forEach(k => {
+  ['name','city','colors','coach','president'].forEach(k => {
     document.getElementById('i-'+k).value = t[k] || '';
   });
   document.getElementById('i-founded').value = t.founded || '';
@@ -235,7 +233,7 @@ function closeInfoModal() { document.getElementById('info-modal').classList.remo
 
 async function saveInfo() {
   const data = {};
-  ['name','stadium','city','colors','coach','president'].forEach(k => {
+  ['name','city','colors','coach','president'].forEach(k => {
     data[k] = document.getElementById('i-'+k).value.trim();
   });
   data.founded = +document.getElementById('i-founded').value;
