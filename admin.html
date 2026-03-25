@@ -11,7 +11,12 @@
   <div id="sidebar-mount"></div>
   <div class="main-content">
     <div class="topbar">
-      <span class="topbar-title">PANNELLO ADMIN</span>
+      <div class="topbar-left">
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="topbar-title">PANNELLO ADMIN</span>
+      </div>
       <div class="topbar-actions">
         <span class="pill pill-red">Admin Only</span>
       </div>
@@ -19,49 +24,90 @@
 
     <div class="page-content" id="admin-content" style="display:none">
 
-      <!-- Overview cards -->
-      <div class="stat-grid fade-up" id="overview-cards"></div>
+      <!-- Tab navigation -->
+      <div style="display:flex;gap:.5rem;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:0">
+        <button class="admin-tab active" onclick="switchTab('overview')" id="tab-overview">Panoramica</button>
+        <button class="admin-tab" onclick="switchTab('accounts')" id="tab-accounts">Account</button>
+        <button class="admin-tab" onclick="switchTab('settings')" id="tab-settings">Squadra</button>
+        <button class="admin-tab" onclick="switchTab('danger')" id="tab-danger">⚠ Dati</button>
+      </div>
 
-      <!-- User Management -->
-      <div class="fade-up delay-1" style="margin-bottom:2rem">
-        <div class="section-header">
-          <div>
-            <div class="section-title">Gestione Utenti</div>
-            <div class="section-subtitle">Account registrati nel sistema</div>
+      <!-- TAB: PANORAMICA -->
+      <div id="panel-overview">
+        <div class="stat-grid fade-up" id="overview-cards"></div>
+      </div>
+
+      <!-- TAB: GESTIONE ACCOUNT -->
+      <div id="panel-accounts" style="display:none">
+        <div class="fade-up">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Gestione Account</div>
+              <div class="section-subtitle">Crea, modifica e gestisci gli accessi al sito</div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openUserModal()">+ Nuovo account</button>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="openUserModal()">+ Aggiungi utente</button>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>ID</th><th>Username</th><th>Nome</th><th>Ruolo</th><th>Azioni</th></tr>
-            </thead>
-            <tbody id="users-table">
-              <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem">Caricamento...</td></tr>
-            </tbody>
-          </table>
+
+          <!-- Legenda ruoli -->
+          <div class="card" style="margin-bottom:1.5rem;padding:1rem">
+            <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:2px;color:var(--muted);font-weight:600;margin-bottom:.75rem">Permessi per ruolo</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem;font-size:.8rem">
+              <div>
+                <span class="pill pill-blue" style="margin-bottom:.4rem;display:inline-flex">Fan</span>
+                <div style="color:var(--muted);font-size:.75rem">Solo visualizzazione. Nessuna modifica.</div>
+              </div>
+              <div>
+                <span class="pill pill-gold" style="margin-bottom:.4rem;display:inline-flex">Membro</span>
+                <div style="color:var(--muted);font-size:.75rem">Aggiunge/modifica giocatori, partite, storia.</div>
+              </div>
+              <div>
+                <span class="pill pill-red" style="margin-bottom:.4rem;display:inline-flex">Admin</span>
+                <div style="color:var(--muted);font-size:.75rem">Accesso completo. Gestisce utenti e dati.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Username</th>
+                  <th>Ruolo attuale</th>
+                  <th>Cambia ruolo</th>
+                  <th>Azioni</th>
+                </tr>
+              </thead>
+              <tbody id="users-table">
+                <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem">Caricamento...</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Impostazioni squadra -->
-      <div class="card fade-up delay-2" style="margin-bottom:2rem">
-        <div class="card-header">
-          <span class="card-title">Impostazioni Squadra</span>
+      <!-- TAB: IMPOSTAZIONI SQUADRA -->
+      <div id="panel-settings" style="display:none">
+        <div class="card fade-up">
+          <div class="card-header">
+            <span class="card-title">Informazioni Squadra</span>
+          </div>
+          <div class="grid-2">
+            <div class="form-group"><label class="form-label">Nome squadra</label><input class="form-input" id="site-name"></div>
+            <div class="form-group"><label class="form-label">Anno fondazione</label><input class="form-input" id="site-founded" type="number"></div>
+            <div class="form-group"><label class="form-label">Città</label><input class="form-input" id="site-city"></div>
+            <div class="form-group"><label class="form-label">Stadio</label><input class="form-input" id="site-stadium"></div>
+            <div class="form-group"><label class="form-label">Colori</label><input class="form-input" id="site-colors"></div>
+            <div class="form-group"><label class="form-label">Allenatore</label><input class="form-input" id="site-coach"></div>
+            <div class="form-group"><label class="form-label">Presidente</label><input class="form-input" id="site-president"></div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="saveSiteSettings()">Salva impostazioni</button>
         </div>
-        <div class="grid-2">
-          <div class="form-group"><label class="form-label">Nome squadra</label><input class="form-input" id="site-name" value="Il Club"></div>
-          <div class="form-group"><label class="form-label">Stagione corrente</label><input class="form-input" id="site-season" value="2024/25"></div>
-          <div class="form-group"><label class="form-label">Città</label><input class="form-input" id="site-city"></div>
-          <div class="form-group"><label class="form-label">Stadio</label><input class="form-input" id="site-stadium"></div>
-          <div class="form-group"><label class="form-label">Allenatore</label><input class="form-input" id="site-coach"></div>
-          <div class="form-group"><label class="form-label">Presidente</label><input class="form-input" id="site-president"></div>
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="saveSiteSettings()">Salva impostazioni</button>
       </div>
 
-      <!-- Danger zone -->
-      <div class="fade-up delay-3">
-        <div class="danger-zone">
+      <!-- TAB: ZONA PERICOLOSA -->
+      <div id="panel-danger" style="display:none">
+        <div class="danger-zone fade-up">
           <div class="danger-title">⚠ Zona Pericolosa</div>
           <p style="font-size:.85rem;color:var(--muted);margin-bottom:1.25rem">Queste azioni sono irreversibili. Procedere con cautela.</p>
           <div style="display:flex;gap:.75rem;flex-wrap:wrap">
@@ -86,42 +132,77 @@
   </div>
 </div>
 
-<!-- User modal -->
+<!-- Modal nuovo/modifica utente -->
 <div class="modal-overlay" id="user-modal">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title" id="user-modal-title">Nuovo Utente</span>
+      <span class="modal-title" id="user-modal-title">Nuovo Account</span>
       <button class="modal-close" onclick="closeUserModal()">✕</button>
     </div>
     <div>
-      <div class="form-group"><label class="form-label">Nome</label><input class="form-input" id="u-name"></div>
-      <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="u-username"></div>
-      <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" id="u-pass"></div>
+      <div class="form-group"><label class="form-label">Nome completo</label><input class="form-input" id="u-name" placeholder="Mario Rossi"></div>
+      <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="u-username" placeholder="mario_rossi"></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" id="u-pass" placeholder="Minimo 6 caratteri"></div>
       <div class="form-group">
         <label class="form-label">Ruolo</label>
         <select class="form-select" id="u-role">
-          <option value="fan">Fan</option>
-          <option value="membro">Membro</option>
-          <option value="admin">Admin</option>
+          <option value="fan">Fan — solo visualizzazione</option>
+          <option value="membro">Membro — può modificare i dati</option>
+          <option value="admin">Admin — accesso completo</option>
         </select>
       </div>
-      <p style="font-size:.75rem;color:var(--muted);margin-bottom:1rem">
-        L'utente riceverà le credenziali e potrà accedere subito.
-      </p>
-      <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:.5rem">
+      <div style="background:var(--surface2);border-radius:8px;padding:.75rem;font-size:.75rem;color:var(--muted);margin-bottom:1rem">
+        💡 L'utente potrà accedere con username e password impostati qui. Comunica le credenziali direttamente alla persona.
+      </div>
+      <div style="display:flex;gap:.75rem;justify-content:flex-end">
         <button class="btn btn-ghost" onclick="closeUserModal()">Annulla</button>
-        <button class="btn btn-primary" onclick="saveUser()">Crea account</button>
+        <button class="btn btn-primary" onclick="saveUser()" id="save-user-btn">Crea account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal reset password -->
+<div class="modal-overlay" id="reset-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Reset Password</span>
+      <button class="modal-close" onclick="closeResetModal()">✕</button>
+    </div>
+    <div>
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:1.25rem">
+        Imposta una nuova password per <strong id="reset-username-label" style="color:var(--white)"></strong>
+      </p>
+      <div class="form-group">
+        <label class="form-label">Nuova password</label>
+        <input class="form-input" type="password" id="reset-pass" placeholder="Minimo 6 caratteri">
+      </div>
+      <div style="display:flex;gap:.75rem;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="closeResetModal()">Annulla</button>
+        <button class="btn btn-primary" onclick="doResetPassword()">Aggiorna password</button>
       </div>
     </div>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
+<style>
+.admin-tab {
+  background: none; border: none; cursor: pointer;
+  padding: .6rem 1.1rem; font-family: 'Outfit', sans-serif;
+  font-size: .8rem; font-weight: 600; color: var(--muted);
+  border-bottom: 2px solid transparent; transition: all .2s;
+  margin-bottom: -1px;
+}
+.admin-tab:hover { color: var(--navy); }
+.admin-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+</style>
 <script src="./js/app.js"></script>
 <script src="./js/sidebar.js"></script>
 <script>
 let allProfiles = [];
 let teamData = null;
+let resetTargetAuthId = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   await AUTH.init();
@@ -140,25 +221,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadTeamSettings();
 });
 
+function switchTab(tab) {
+  ['overview','accounts','settings','danger'].forEach(t => {
+    document.getElementById('panel-' + t).style.display = t === tab ? '' : 'none';
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+  });
+}
+
 async function renderOverview() {
   try {
     const [players, results, upcoming] = await Promise.all([
       DB.getPlayers(), DB.getResults(), DB.getUpcoming()
     ]);
     let w=0,d=0,l=0;
-    results.forEach(r=>{
-      const home=r.home==='Il Club';
-      const myG=home?r.gh:r.ga;
-      const oppG=home?r.ga:r.gh;
-      if(myG>oppG)w++;else if(myG===oppG)d++;else l++;
+    results.forEach(r => {
+      const home = r.home === 'Il Club';
+      const myG = home ? r.gh : r.ga;
+      const oppG = home ? r.ga : r.gh;
+      if(myG>oppG)w++; else if(myG===oppG)d++; else l++;
     });
-    const pts = w*3+d;
     document.getElementById('overview-cards').innerHTML = [
-      { label:'Giocatori', val: players.length, badge:'badge-blue' },
-      { label:'Partite archiviate', val: results.length, badge:'badge-gold' },
-      { label:'Prossime gare', val: upcoming.length, badge:'badge-green' },
-      { label:'Punti stagione', val: pts, badge:'badge-gold' },
-    ].map(c=>`<div class="stat-card">
+      { label:'Utenti registrati', val: allProfiles.length, badge:'badge-blue' },
+      { label:'Giocatori',         val: players.length,     badge:'badge-gold' },
+      { label:'Partite archiviate',val: results.length,     badge:'badge-gold' },
+      { label:'Prossime gare',     val: upcoming.length,    badge:'badge-green' },
+      { label:'Punti stagione',    val: w*3+d,              badge:'badge-gold' },
+      { label:'Vittorie',          val: w,                  badge:'badge-green' },
+    ].map(c => `<div class="stat-card">
       <div class="stat-label">${c.label}</div>
       <div class="stat-value">${c.val}</div>
       <span class="stat-badge ${c.badge}">${c.label}</span>
@@ -170,18 +259,31 @@ async function renderOverview() {
 
 function renderUsers() {
   const roleColors = { admin:'pill-red', membro:'pill-gold', fan:'pill-blue' };
-  document.getElementById('users-table').innerHTML = allProfiles.map(u=>`
+  const tbody = document.getElementById('users-table');
+  if (allProfiles.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem">Nessun utente trovato</td></tr>';
+    return;
+  }
+  tbody.innerHTML = allProfiles.map(u => `
     <tr>
-      <td style="color:var(--muted)">${u.id}</td>
-      <td><strong>${u.username}</strong></td>
-      <td>${u.name}</td>
+      <td><strong>${u.name}</strong></td>
+      <td style="color:var(--muted)">${u.username}</td>
       <td><span class="pill ${roleColors[u.role]||'pill-gray'}">${u.role}</span></td>
       <td>
-        <select class="form-select" style="width:120px;padding:.3rem .5rem;font-size:.75rem" onchange="changeRole(${u.id}, this.value)">
-          <option value="fan" ${u.role==='fan'?'selected':''}>Fan</option>
+        <select class="form-select" style="width:130px;padding:.3rem .5rem;font-size:.75rem"
+                onchange="changeRole(${u.id}, this.value)"
+                ${u.id === AUTH.currentUser?.id ? 'disabled title="Non puoi modificare il tuo ruolo"' : ''}>
+          <option value="fan"    ${u.role==='fan'   ?'selected':''}>Fan</option>
           <option value="membro" ${u.role==='membro'?'selected':''}>Membro</option>
-          <option value="admin" ${u.role==='admin'?'selected':''}>Admin</option>
+          <option value="admin"  ${u.role==='admin' ?'selected':''}>Admin</option>
         </select>
+      </td>
+      <td style="display:flex;gap:.4rem;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="openResetModal(${u.id},'${u.username}','${u.auth_id}')">🔑 Password</button>
+        ${u.id !== AUTH.currentUser?.id
+          ? `<button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id},'${u.name}')">✕ Elimina</button>`
+          : `<span style="font-size:.7rem;color:var(--muted);padding:.3rem">(tu)</span>`
+        }
       </td>
     </tr>
   `).join('');
@@ -196,27 +298,45 @@ async function changeRole(id, role) {
   } catch(e) { UI.toast('Errore: ' + e.message, 'error'); }
 }
 
+async function deleteUser(id, name) {
+  UI.confirm(`Eliminare l'account di "${name}"? L'utente non potrà più accedere.`, async () => {
+    try {
+      await DB.deleteProfile(id);
+      allProfiles = allProfiles.filter(u => u.id !== id);
+      renderUsers();
+      renderOverview();
+      UI.toast('Account eliminato', 'info');
+    } catch(e) { UI.toast('Errore: ' + e.message, 'error'); }
+  });
+}
+
+// ---- Nuovo utente ----
 function openUserModal() {
   document.getElementById('u-name').value = '';
   document.getElementById('u-username').value = '';
   document.getElementById('u-pass').value = '';
   document.getElementById('u-role').value = 'fan';
+  document.getElementById('user-modal-title').textContent = 'Nuovo Account';
   document.getElementById('user-modal').classList.add('open');
 }
 function closeUserModal() { document.getElementById('user-modal').classList.remove('open'); }
 
 async function saveUser() {
-  const name = document.getElementById('u-name').value.trim();
+  const name     = document.getElementById('u-name').value.trim();
   const username = document.getElementById('u-username').value.trim();
-  const pass = document.getElementById('u-pass').value;
-  const role = document.getElementById('u-role').value;
+  const pass     = document.getElementById('u-pass').value;
+  const role     = document.getElementById('u-role').value;
   if (!name || !username || !pass) { UI.toast('Compila tutti i campi', 'error'); return; }
+  if (pass.length < 6) { UI.toast('Password minimo 6 caratteri', 'error'); return; }
   if (allProfiles.find(u => u.username === username)) { UI.toast('Username già in uso', 'error'); return; }
-  // Registra tramite Supabase Auth + profile
+
+  const btn = document.getElementById('save-user-btn');
+  btn.disabled = true; btn.textContent = 'Creazione...';
+
   try {
     const email = `${username}@ilclub.local`;
     const data = await SB.signUp(email, pass);
-    if (data.error) { UI.toast(data.error.message || 'Errore creazione account', 'error'); return; }
+    if (data.error) { UI.toast(data.error.message || 'Errore creazione', 'error'); return; }
     const userId = data.user?.id || data.id;
     const sessionToken = data.session?.access_token;
     const savedToken = AUTH._sbToken;
@@ -224,29 +344,72 @@ async function saveUser() {
     const profiles = await SB.post('profiles', { auth_id: userId, username, name, role });
     AUTH._sbToken = savedToken;
     if (profiles && profiles[0]) allProfiles.push(profiles[0]);
-    UI.toast(`Utente "${username}" creato come ${role}`, 'success');
+    UI.toast(`Account "${username}" creato come ${role}`, 'success');
     closeUserModal();
     renderUsers();
+    renderOverview();
   } catch(e) {
     UI.toast('Errore: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Crea account';
   }
 }
 
+// ---- Reset password ----
+function openResetModal(id, username, authId) {
+  resetTargetAuthId = authId;
+  document.getElementById('reset-username-label').textContent = username;
+  document.getElementById('reset-pass').value = '';
+  document.getElementById('reset-modal').classList.add('open');
+}
+function closeResetModal() { document.getElementById('reset-modal').classList.remove('open'); resetTargetAuthId = null; }
+
+async function doResetPassword() {
+  const newPass = document.getElementById('reset-pass').value;
+  if (!newPass || newPass.length < 6) { UI.toast('Password minimo 6 caratteri', 'error'); return; }
+  // Supabase Admin API per reset password — richiede service_role key
+  // Con la anon key non è possibile aggiornare la password di altri utenti direttamente.
+  // Alternativa: usiamo un RPC function lato Supabase
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/admin_reset_password`, {
+      method: 'POST',
+      headers: { ...SB.headers(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target_auth_id: resetTargetAuthId, new_password: newPass })
+    });
+    if (res.ok) {
+      UI.toast('Password aggiornata con successo', 'success');
+      closeResetModal();
+    } else {
+      // Fallback: mostra istruzioni manuali
+      UI.toast('Per il reset password usa il pannello Supabase → Authentication → Users', 'info');
+      closeResetModal();
+    }
+  } catch(e) {
+    UI.toast('Reset via pannello Supabase → Authentication → Users', 'info');
+    closeResetModal();
+  }
+}
+
+// ---- Settings squadra ----
 function loadTeamSettings() {
   if (!teamData) return;
-  document.getElementById('site-name').value = teamData.name || '';
-  document.getElementById('site-city').value = teamData.city || '';
-  document.getElementById('site-stadium').value = teamData.stadium || '';
-  document.getElementById('site-coach').value = teamData.coach || '';
-  document.getElementById('site-president').value = teamData.president || '';
+  document.getElementById('site-name').value     = teamData.name      || '';
+  document.getElementById('site-founded').value  = teamData.founded   || '';
+  document.getElementById('site-city').value     = teamData.city      || '';
+  document.getElementById('site-stadium').value  = teamData.stadium   || '';
+  document.getElementById('site-colors').value   = teamData.colors    || '';
+  document.getElementById('site-coach').value    = teamData.coach     || '';
+  document.getElementById('site-president').value= teamData.president || '';
 }
 
 async function saveSiteSettings() {
   const data = {
-    name: document.getElementById('site-name').value.trim(),
-    city: document.getElementById('site-city').value.trim(),
-    stadium: document.getElementById('site-stadium').value.trim(),
-    coach: document.getElementById('site-coach').value.trim(),
+    name:      document.getElementById('site-name').value.trim(),
+    founded:   +document.getElementById('site-founded').value || null,
+    city:      document.getElementById('site-city').value.trim(),
+    stadium:   document.getElementById('site-stadium').value.trim(),
+    colors:    document.getElementById('site-colors').value.trim(),
+    coach:     document.getElementById('site-coach').value.trim(),
     president: document.getElementById('site-president').value.trim(),
   };
   try {
@@ -256,6 +419,7 @@ async function saveSiteSettings() {
   } catch(e) { UI.toast('Errore: ' + e.message, 'error'); }
 }
 
+// ---- Zona pericolosa ----
 async function clearPlayers() {
   UI.confirm('Svuotare tutta la rosa? Azione irreversibile!', async () => {
     try {
@@ -266,7 +430,6 @@ async function clearPlayers() {
     } catch(e) { UI.toast('Errore: ' + e.message, 'error'); }
   });
 }
-
 async function clearResults() {
   UI.confirm('Eliminare tutti i risultati? Azione irreversibile!', async () => {
     try {
@@ -277,9 +440,8 @@ async function clearResults() {
     } catch(e) { UI.toast('Errore: ' + e.message, 'error'); }
   });
 }
-
 async function clearUpcoming() {
-  UI.confirm('Svuotare il calendario partite? Azione irreversibile!', async () => {
+  UI.confirm('Svuotare il calendario? Azione irreversibile!', async () => {
     try {
       const upcoming = await DB.getUpcoming();
       for (const u of upcoming) await DB.deleteUpcoming(u.id);

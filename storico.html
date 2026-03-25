@@ -11,7 +11,12 @@
   <div id="sidebar-mount"></div>
   <div class="main-content">
     <div class="topbar">
-      <span class="topbar-title">STORICO</span>
+      <div class="topbar-left">
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="topbar-title">STORICO</span>
+      </div>
       <div class="topbar-actions">
         <button class="btn btn-primary btn-sm" id="add-result-btn" style="display:none" onclick="openModal()">+ Aggiungi partita</button>
       </div>

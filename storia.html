@@ -11,7 +11,12 @@
   <div id="sidebar-mount"></div>
   <div class="main-content">
     <div class="topbar">
-      <span class="topbar-title">STORIA</span>
+      <div class="topbar-left">
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="topbar-title">STORIA</span>
+      </div>
       <div class="topbar-actions">
         <button class="btn btn-primary btn-sm" id="add-history-btn" style="display:none" onclick="openModal()">+ Aggiungi</button>
       </div>
@@ -22,7 +27,7 @@
       <div class="fade-up" style="margin-bottom:3rem;padding:3rem;background:var(--surface);border:1px solid var(--border);border-radius:16px;position:relative;overflow:hidden">
         <div style="position:absolute;top:-40px;right:-40px;font-family:'Bebas Neue',sans-serif;font-size:12rem;color:rgba(201,168,76,0.04);line-height:1;pointer-events:none" id="founded-bg"></div>
         <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap">
-          <img src="./style/img/logov2.png" alt="IL CLUB" style="width:80px;height:80px;object-fit:contain">
+          <img src="./style/img/logov2.png" alt="IL CLUB" style="width:80px;height:80px;object-fit:contain;filter:drop-shadow(0 0 20px rgba(201,168,76,0.4))">
           <div>
             <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:6px;color:var(--white);line-height:1" id="hero-name">IL CLUB</div>
             <div style="font-size:.85rem;color:var(--muted);margin-top:.5rem" id="hero-info">Caricamento...</div>

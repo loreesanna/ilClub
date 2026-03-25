@@ -12,17 +12,21 @@
 
   <div class="main-content">
     <div class="topbar">
-      <button onclick="toggleSidebar()" style="display:none;background:none;border:none;color:var(--white);cursor:pointer;font-size:1.4rem" id="menu-btn">☰</button>
-      <span class="topbar-title">DASHBOARD</span>
+      <div class="topbar-left">
+        <button class="menu-btn" onclick="toggleSidebar()" id="menu-btn" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="topbar-title">DASHBOARD</span>
+      </div>
       <div class="topbar-actions">
         <span id="today-date" style="font-size:.8rem;color:var(--muted)"></span>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>
         <a href="login.html" class="btn btn-ghost btn-sm" id="login-btn">Accedi</a>
       </div>
     </div>
 
     <div class="page-content">
 
-      <!-- Welcome banner -->
       <div style="margin-bottom:2rem" class="fade-up">
         <div style="display:flex;align-items:center;gap:1rem;margin-bottom:.5rem">
           <div style="width:3px;height:2rem;background:var(--gold);border-radius:2px"></div>
@@ -31,15 +35,11 @@
         <p style="font-size:.875rem;color:var(--muted);padding-left:1rem" id="welcome-sub">Caricamento...</p>
       </div>
 
-      <!-- Stat cards -->
       <div class="stat-grid fade-up delay-1" id="stat-grid">
         <div class="stat-card"><div class="stat-label">Caricamento...</div></div>
       </div>
 
-      <!-- Charts row -->
       <div class="grid-2 fade-up delay-2" style="margin-bottom:2rem">
-
-        <!-- Forma recente -->
         <div class="card">
           <div class="card-header">
             <span class="card-title">Forma recente</span>
@@ -47,8 +47,6 @@
           </div>
           <div class="bar-chart" id="monthly-chart"></div>
         </div>
-
-        <!-- W/D/L donut -->
         <div class="card">
           <div class="card-header">
             <span class="card-title">Andamento stagione</span>
@@ -73,7 +71,6 @@
               <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div><span>Sconfitte: <strong id="leg-l">—</strong></span></div>
             </div>
           </div>
-          <!-- Gol chart -->
           <div style="margin-top:1.5rem">
             <div class="bar-chart">
               <div class="bar-row">
@@ -91,7 +88,6 @@
         </div>
       </div>
 
-      <!-- Top scorers + Upcoming -->
       <div class="grid-2 fade-up delay-3" style="margin-bottom:2rem">
         <div class="card">
           <div class="card-header">
@@ -100,7 +96,6 @@
           </div>
           <div id="top-scorers"><div style="padding:1rem;color:var(--muted);font-size:.85rem">Caricamento...</div></div>
         </div>
-
         <div class="card">
           <div class="card-header">
             <span class="card-title">Prossime partite</span>
@@ -110,7 +105,6 @@
         </div>
       </div>
 
-      <!-- Ultimi risultati -->
       <div class="fade-up delay-4">
         <div class="section-header">
           <div>
@@ -122,14 +116,7 @@
         <div class="table-wrap">
           <table>
             <thead>
-              <tr>
-                <th>Data</th>
-                <th>Casa</th>
-                <th>Risultato</th>
-                <th>Ospite</th>
-                <th>Competizione</th>
-                <th>Ris.</th>
-              </tr>
+              <tr><th>Data</th><th>Casa</th><th>Risultato</th><th>Ospite</th><th>Competizione</th><th>Ris.</th></tr>
             </thead>
             <tbody id="results-table">
               <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">Caricamento...</td></tr>
@@ -138,18 +125,28 @@
         </div>
       </div>
 
-    </div><!-- /page-content -->
-  </div><!-- /main-content -->
+    </div>
+  </div>
 </div>
 
 <div id="toast" class="toast"></div>
-
 <script src="./js/app.js"></script>
 <script src="./js/sidebar.js"></script>
 <script>
-const CIRC = 2 * Math.PI * 48; // ≈ 301.6
+const CIRC = 2 * Math.PI * 48;
 
-// ---- Helpers rendering ----
+// Theme
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
+  localStorage.setItem('ilclub_theme', isDark ? 'light' : 'dark');
+  document.querySelector('.theme-toggle').textContent = isDark ? '🌙' : '☀️';
+}
+(function(){
+  const t = localStorage.getItem('ilclub_theme');
+  if (t === 'dark') { document.documentElement.setAttribute('data-theme','dark'); }
+})();
+
 function renderStatsCards(stats) {
   if (!stats) return;
   const sg = document.getElementById('stat-grid');
@@ -157,10 +154,10 @@ function renderStatsCards(stats) {
   const avgGoals = stats.played > 0 ? (stats.gf / stats.played).toFixed(1) : '—';
   const gdSign = stats.gd >= 0 ? '+' : '';
   const cards = [
-    { label:'Punti',      val: stats.pts,          sub:`${stats.played} partite giocate`,          badge:'badge-gold',  badgeTxt:`${stats.w*3}+${stats.d}` },
-    { label:'Vittorie',   val: stats.w,             sub:`${winRate}% win rate`,                     badge:'badge-green', badgeTxt:'↑' },
-    { label:'Gol segnati',val: stats.gf,            sub:`Media ${avgGoals} a partita`,              badge:'badge-blue',  badgeTxt:'GF' },
-    { label:'Diff. reti', val: `${gdSign}${stats.gd}`, sub:`${stats.gf} fatti · ${stats.ga} subiti`, badge: stats.gd >= 0 ? 'badge-green' : 'badge-red', badgeTxt: stats.gd >= 0 ? '↑' : '↓' },
+    { label:'Punti',      val: stats.pts,               sub:`${stats.played} partite giocate`,          badge:'badge-gold',  badgeTxt:`${stats.w*3}+${stats.d}` },
+    { label:'Vittorie',   val: stats.w,                  sub:`${winRate}% win rate`,                     badge:'badge-green', badgeTxt:'↑' },
+    { label:'Gol segnati',val: stats.gf,                 sub:`Media ${avgGoals} a partita`,              badge:'badge-blue',  badgeTxt:'GF' },
+    { label:'Diff. reti', val: `${gdSign}${stats.gd}`,   sub:`${stats.gf} fatti · ${stats.ga} subiti`,  badge: stats.gd >= 0 ? 'badge-green' : 'badge-red', badgeTxt: stats.gd >= 0 ? '↑' : '↓' },
   ];
   sg.innerHTML = cards.map(c => `
     <div class="stat-card">
@@ -168,8 +165,7 @@ function renderStatsCards(stats) {
       <div class="stat-value">${c.val}</div>
       <div><span class="stat-badge ${c.badge}">${c.badgeTxt}</span></div>
       <div class="stat-sub">${c.sub}</div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 function renderDonut(stats) {
@@ -192,7 +188,6 @@ function renderDonut(stats) {
   document.getElementById('leg-d').textContent = stats.d;
   document.getElementById('leg-l').textContent = stats.l;
   document.getElementById('pts-pill').textContent = `${stats.pts} pts`;
-
   const maxG = Math.max(stats.gf, stats.ga, 1);
   setTimeout(() => {
     document.getElementById('bar-gf').style.width = (stats.gf / maxG * 100) + '%';
@@ -234,8 +229,7 @@ function renderMonthlyChart(results) {
   mc.innerHTML = Object.entries(months).map(([m, v]) => {
     const tot = v.w + v.d + v.l;
     const wPct = Math.round(v.w / tot * 100);
-    return `
-    <div class="bar-row">
+    return `<div class="bar-row">
       <span class="bar-label">${m}</span>
       <div class="bar-track"><div class="bar-fill green" style="width:${wPct}%"></div></div>
       <span class="bar-val">${v.w}V ${v.d}P ${v.l}S</span>
@@ -247,10 +241,7 @@ function renderTopScorers(players) {
   const sorted   = [...players].sort((a, b) => b.goals - a.goals).slice(0, 5);
   const maxGoals = sorted[0]?.goals || 1;
   const ts = document.getElementById('top-scorers');
-  if (sorted.length === 0) {
-    ts.innerHTML = '<div style="color:var(--muted);font-size:.85rem;padding:1rem">Nessun dato</div>';
-    return;
-  }
+  if (sorted.length === 0) { ts.innerHTML = '<div style="color:var(--muted);font-size:.85rem;padding:1rem">Nessun dato</div>'; return; }
   ts.innerHTML = `<div class="bar-chart">${sorted.map((p, i) => `
     <div class="bar-row">
       <span class="bar-label" style="font-size:.78rem;color:var(--white)">${i + 1}. ${p.name.split(' ').pop()}</span>
@@ -261,10 +252,7 @@ function renderTopScorers(players) {
 
 function renderUpcoming(upcoming) {
   const ul = document.getElementById('upcoming-list');
-  if (!upcoming || upcoming.length === 0) {
-    ul.innerHTML = '<div style="color:var(--muted);font-size:.85rem;padding:1rem">Nessuna partita programmata</div>';
-    return;
-  }
+  if (!upcoming || upcoming.length === 0) { ul.innerHTML = '<div style="color:var(--muted);font-size:.85rem;padding:1rem">Nessuna partita programmata</div>'; return; }
   ul.innerHTML = upcoming.slice(0, 4).map(m => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--border)">
       <div>
@@ -275,16 +263,12 @@ function renderUpcoming(upcoming) {
         <span class="pill ${m.venue === 'Casa' ? 'pill-blue' : 'pill-gray'}">${m.venue}</span>
         <div style="font-size:.7rem;color:var(--muted);margin-top:.25rem">${m.comp}</div>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 function renderResultsTable(results) {
   const rt = document.getElementById('results-table');
-  if (!results || results.length === 0) {
-    rt.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">Nessun risultato disponibile</td></tr>';
-    return;
-  }
+  if (!results || results.length === 0) { rt.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">Nessun risultato disponibile</td></tr>'; return; }
   rt.innerHTML = [...results].slice(-6).reverse().map(r => {
     const home = r.home === 'Il Club';
     const myG  = home ? r.gh : r.ga;
@@ -303,8 +287,15 @@ function renderResultsTable(results) {
   }).join('');
 }
 
-// ---- Main load ----
 document.addEventListener('DOMContentLoaded', async () => {
+  // Applica tema salvato
+  const savedTheme = localStorage.getItem('ilclub_theme');
+  if (savedTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme','dark');
+    const tt = document.querySelector('.theme-toggle');
+    if (tt) tt.textContent = '☀️';
+  }
+
   document.getElementById('today-date').textContent = new Date().toLocaleDateString('it-IT', {
     weekday:'long', day:'numeric', month:'long', year:'numeric'
   });
@@ -314,12 +305,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (AUTH.currentUser) {
     lb.textContent = AUTH.currentUser.name;
     lb.href = '#';
-    lb.onclick = () => AUTH.logout();
+    lb.onclick = () => { if (confirm('Vuoi uscire?')) AUTH.logout(); };
     document.getElementById('welcome-text').textContent = `Ciao, ${AUTH.currentUser.name.split(' ')[0]}`;
   }
 
   try {
-    // Caricamento parallelo di tutti i dati
     const [team, stats, results, players, upcoming] = await Promise.all([
       DB.getTeam().catch(() => null),
       DB.getStats().catch(() => null),
@@ -327,19 +317,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       DB.getPlayers().catch(() => []),
       DB.getUpcoming().catch(() => []),
     ]);
-
-    // Welcome subtitle con dati squadra
     if (team) {
-      document.getElementById('welcome-sub').textContent =
-        `${team.name} · ${team.city} · Stagione corrente`;
-    }
-
-    // Sottotitolo tabella risultati
-    if (team) {
+      document.getElementById('welcome-sub').textContent = `${team.name} · ${team.city} · Stagione corrente`;
       document.getElementById('season-subtitle').textContent = `Stagione corrente — ${team.name}`;
     }
-
-    // Render components
     if (stats)   renderStatsCards(stats);
     if (stats)   renderDonut(stats);
     if (results.length) renderResultsStrip(results);
@@ -347,19 +328,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (players.length) renderTopScorers(players);
     renderUpcoming(upcoming);
     renderResultsTable(results);
-
   } catch (err) {
     console.error('Errore caricamento dashboard:', err);
-    UI.toast('Impossibile connettersi al server. Verifica la configurazione API.', 'error');
+    UI.toast('Impossibile connettersi al server.', 'error');
   }
 });
-
-function toggleSidebar() {
-  const s = document.getElementById('sidebar');
-  const o = document.getElementById('sidebar-overlay');
-  s.classList.toggle('open');
-  o.style.display = s.classList.contains('open') ? '' : 'none';
-}
 </script>
 </body>
 </html>

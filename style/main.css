@@ -658,3 +658,5 @@ tbody tr:hover td{background:var(--accent-light)}
   .topbar{padding-top:max(0px,env(safe-area-inset-top))}
   .sidebar{padding-top:max(0px,env(safe-area-inset-top))}
 }
+
+/* === PATCH v2: topbar-left già definito sopra, aggiunto per sicurezza === */
