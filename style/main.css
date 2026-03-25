@@ -610,34 +610,95 @@ tbody tr:hover td{background:var(--accent-light)}
 
   .login-box{padding:2rem 1.25rem}
 
-  /* Bottom-nav for mobile */
-  .mobile-bottom-nav{
-    display:flex;
-    position:fixed;bottom:0;left:0;right:0;
-    background:var(--bg2);
-    border-top:1px solid var(--border);
-    z-index:150;
-    padding:.5rem 0 calc(.5rem + env(safe-area-inset-bottom));
-    box-shadow:0 -4px 20px rgba(0,0,0,.08);
-  }
-  .mobile-bottom-nav a{
-    flex:1;display:flex;flex-direction:column;
-    align-items:center;gap:.2rem;
-    text-decoration:none;color:var(--muted);
-    font-size:.58rem;font-weight:600;
-    text-transform:uppercase;letter-spacing:.5px;
-    padding:.3rem;transition:color .2s;
-    -webkit-user-select:none;user-select:none;
-  }
-  .mobile-bottom-nav a svg{width:20px;height:20px;stroke:currentColor}
-  .mobile-bottom-nav a.active{color:var(--accent)}
-  .mobile-bottom-nav a:hover{color:var(--navy)}
-
-  /* Extra padding-bottom when bottom-nav is visible */
-  .main-content{padding-bottom:64px}
-
+  .main-content{padding-bottom:72px}
   .btn{min-height:40px}
   .btn-sm{min-height:34px}
+}
+
+
+/* =====================================================
+   BOTTOM NAV MOBILE — sempre nascosta su desktop
+   ===================================================== */
+.mobile-bottom-nav {
+  display: none; /* nascosta su desktop */
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  z-index: 150;
+  padding: .4rem 0 calc(.4rem + env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 20px rgba(0,0,0,.10);
+}
+.mobile-bottom-nav a {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: .15rem;
+  text-decoration: none; color: var(--muted);
+  font-size: .55rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .5px;
+  padding: .3rem .2rem;
+  transition: color .2s;
+  -webkit-user-select: none; user-select: none;
+}
+.mobile-bottom-nav a svg {
+  width: 22px; height: 22px;
+  stroke: currentColor; flex-shrink: 0;
+}
+.mobile-bottom-nav a span { line-height: 1; }
+.mobile-bottom-nav a.active { color: var(--accent); }
+.mobile-bottom-nav a:active { opacity: .7; }
+
+@media(max-width: 768px) {
+  .mobile-bottom-nav { display: flex; }
+}
+
+/* =====================================================
+   ANIMAZIONI GRAFICI DASHBOARD
+   ===================================================== */
+@keyframes barGrow {
+  from { width: 0 !important; }
+  to   { /* width dal JS */ }
+}
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes donutDraw {
+  from { stroke-dasharray: 0 302 !important; }
+}
+@keyframes stripPop {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.bar-fill {
+  transition: width 1s cubic-bezier(.4,0,.2,1);
+}
+.bar-fill.animated {
+  animation: none; /* driven by JS transition */
+}
+
+.stat-value {
+  animation: countUp .5s ease forwards;
+}
+
+.result-dot {
+  animation: stripPop .3s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+.bar-row {
+  animation: fadeSlideIn .4s ease both;
+}
+
+#arc-w, #arc-d, #arc-l {
+  transition: stroke-dasharray .9s cubic-bezier(.4,0,.2,1),
+              stroke-dashoffset .9s cubic-bezier(.4,0,.2,1);
+}
+
+.scorer-bar {
+  transition: width 1.1s cubic-bezier(.4,0,.2,1);
 }
 
 /* =====================================================
