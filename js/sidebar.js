@@ -36,7 +36,7 @@
     </nav>
     <div class="sidebar-footer">
       <div class="user-chip" id="user-chip-btn" title="Clicca per uscire">
-        <div class="user-avatar" id="user-avatar">?</div>
+        <div class="user-avatar" id="user-avatar"><img src = "../style/img/user-4-16.png"></div>
         <div class="user-info">
           <div class="user-name" id="user-name">—</div>
           <div class="user-role" id="user-role"></div>
