@@ -18,6 +18,7 @@
         <span class="topbar-title">ROSA</span>
       </div>
       <div class="topbar-actions">
+        <button class="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>
         <div id="action-bar"></div>
       </div>
     </div>
@@ -186,6 +187,24 @@ function editPlayer(id) {
   if (p) openModal(p);
 }
 
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
+  localStorage.setItem('ilclub_theme', isDark ? 'light' : 'dark');
+  document.querySelector('.theme-toggle').textContent = isDark ? '🌙' : '☀️';
+}
+(function(){
+  const t = localStorage.getItem('ilclub_theme');
+  if (t === 'dark') {
+    document.documentElement.setAttribute('data-theme','dark');
+    document.addEventListener('DOMContentLoaded', () => {
+      const tt = document.querySelector('.theme-toggle');
+      if (tt) tt.textContent = '☀️';
+    });
+  }
+})();
+
+  
 async function savePlayer() {
   const data = {
     name: document.getElementById('f-name').value.trim(),
