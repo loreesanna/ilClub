@@ -18,6 +18,7 @@
         <span class="topbar-title">STORICO</span>
       </div>
       <div class="topbar-actions">
+        <button class="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>
         <button class="btn btn-primary btn-sm" id="add-result-btn" style="display:none" onclick="openModal()">+ Aggiungi partita</button>
       </div>
     </div>
@@ -267,6 +268,24 @@ function openModal(r=null) {
 }
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
 
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
+  localStorage.setItem('ilclub_theme', isDark ? 'light' : 'dark');
+  document.querySelector('.theme-toggle').textContent = isDark ? '🌙' : '☀️';
+}
+(function(){
+  const t = localStorage.getItem('ilclub_theme');
+  if (t === 'dark') {
+    document.documentElement.setAttribute('data-theme','dark');
+    document.addEventListener('DOMContentLoaded', () => {
+      const tt = document.querySelector('.theme-toggle');
+      if (tt) tt.textContent = '☀️';
+    });
+  }
+})();
+
+  
 function editResult(id) {
   const r = allResults.find(r => r.id === id);
   if (r) openModal(r);
