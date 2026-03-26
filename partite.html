@@ -119,6 +119,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   render();
 });
 
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
+  localStorage.setItem('ilclub_theme', isDark ? 'light' : 'dark');
+  document.querySelector('.theme-toggle').textContent = isDark ? '🌙' : '☀️';
+}
+(function(){
+  const t = localStorage.getItem('ilclub_theme');
+  if (t === 'dark') {
+    document.documentElement.setAttribute('data-theme','dark');
+    document.addEventListener('DOMContentLoaded', () => {
+      const tt = document.querySelector('.theme-toggle');
+      if (tt) tt.textContent = '☀️';
+    });
+  }
+})();
+  
 function render() {
   const venueF = document.getElementById('filter-venue').value;
   const can = AUTH.can('editMatch');
