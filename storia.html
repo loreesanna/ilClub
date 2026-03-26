@@ -16,8 +16,9 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
         <span class="topbar-title">STORIA</span>
-      </div>
+      </div<button class="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>>
       <div class="topbar-actions">
+        
         <button class="btn btn-primary btn-sm" id="add-history-btn" style="display:none" onclick="openModal()">+ Aggiungi</button>
       </div>
     </div>
@@ -183,6 +184,24 @@ function openModal(h=null) {
 }
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
 
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
+  localStorage.setItem('ilclub_theme', isDark ? 'light' : 'dark');
+  document.querySelector('.theme-toggle').textContent = isDark ? '🌙' : '☀️';
+}
+(function(){
+  const t = localStorage.getItem('ilclub_theme');
+  if (t === 'dark') {
+    document.documentElement.setAttribute('data-theme','dark');
+    document.addEventListener('DOMContentLoaded', () => {
+      const tt = document.querySelector('.theme-toggle');
+      if (tt) tt.textContent = '☀️';
+    });
+  }
+})();
+
+  
 function editEvent(id) {
   const h = allHistory.find(h => h.id === id);
   if (h) openModal(h);
