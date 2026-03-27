@@ -28,39 +28,84 @@
     .player-card.selected .select-check {
       background: var(--accent); border-color: var(--accent); color: #fff;
     }
-
-    /* ---- Barra azione collettiva ---- */
-    /* ---- Barra azione collettiva ---- */
+/* ---- Barra azione collettiva ---- */
     .bulk-bar {
-      position: sticky; top: 56px; z-index: 90;
-      background: var(--accent); color: #fff;
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(150%);
+      z-index: 100;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
       padding: .75rem 1.25rem;
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 1rem; flex-wrap: wrap;
-      border-radius: 0 0 12px 12px;
-      box-shadow: var(--shadow-md);
-      margin: 0 -1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: nowrap;
+      border-radius: 100px; /* Forma a "pillola" elegante */
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
       
-      /* ---- FIX: Nasconde completamente la barra quando non è attiva ---- */
-      transform: translateY(-150%); /* Spinta un po' più in alto per sicurezza */
       opacity: 0;
       visibility: hidden;
-      pointer-events: none; /* Impedisce clic accidentali quando è invisibile */
-      
-      /* Transizione fluida su tutte le proprietà */
-      transition: all .25s cubic-bezier(.4,0,.2,1);
+      pointer-events: none;
+      transition: all .3s cubic-bezier(.4,0,.2,1);
+      width: max-content;
+      max-width: 90vw;
     }
     
     .bulk-bar.visible { 
-      /* ---- FIX: Ripristina la visibilità quando attiva ---- */
-      transform: translateY(0); 
+      transform: translateX(-50%) translateY(0);
       opacity: 1;
       visibility: visible;
       pointer-events: auto;
     }
-    .bulk-btn:hover { background: rgba(255,255,255,.35); }
-    .bulk-btn.danger { background: rgba(248,113,113,.25); border-color: rgba(248,113,113,.4); }
-    .bulk-btn.danger:hover { background: rgba(248,113,113,.4); }
+
+    .bulk-bar-info { 
+      font-size: .85rem; 
+      font-weight: 600; 
+      color: var(--accent);
+      white-space: nowrap;
+    }
+    
+    .bulk-bar-actions { 
+      display: flex; 
+      gap: .5rem; 
+      align-items: center;
+    }
+
+    /* Ripristinato lo stile base dei pulsanti del menu bulk */
+    .bulk-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      border-radius: 50px; /* In linea con il nuovo stile a pillola */
+      padding: .4rem 1rem;
+      font-size: .75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+      font-family: 'Outfit', sans-serif;
+    }
+    
+    .bulk-btn:hover { 
+      background: var(--bg2); 
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    .bulk-btn.danger { 
+      background: rgba(248,113,113,.1); 
+      border-color: rgba(248,113,113,.2); 
+      color: #f87171;
+    }
+    
+    .bulk-btn.danger:hover { 
+      background: rgba(248,113,113,.2); 
+      border-color: rgba(248,113,113,.4); 
+    }
 
     /* ---- Modal selezione multipla ---- */
     .bulk-input-row {
