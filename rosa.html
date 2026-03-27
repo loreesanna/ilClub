@@ -30,6 +30,7 @@
     }
 
     /* ---- Barra azione collettiva ---- */
+    /* ---- Barra azione collettiva ---- */
     .bulk-bar {
       position: sticky; top: 56px; z-index: 90;
       background: var(--accent); color: #fff;
@@ -38,19 +39,24 @@
       gap: 1rem; flex-wrap: wrap;
       border-radius: 0 0 12px 12px;
       box-shadow: var(--shadow-md);
-      transform: translateY(-100%);
-      transition: transform .25s cubic-bezier(.4,0,.2,1);
       margin: 0 -1.75rem;
+      
+      /* ---- FIX: Nasconde completamente la barra quando non è attiva ---- */
+      transform: translateY(-150%); /* Spinta un po' più in alto per sicurezza */
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none; /* Impedisce clic accidentali quando è invisibile */
+      
+      /* Transizione fluida su tutte le proprietà */
+      transition: all .25s cubic-bezier(.4,0,.2,1);
     }
-    .bulk-bar.visible { transform: translateY(0); }
-    .bulk-bar-info { font-size: .85rem; font-weight: 600; }
-    .bulk-bar-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
-    .bulk-btn {
-      background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.3);
-      color: #fff; border-radius: 7px; padding: .35rem .8rem;
-      font-size: .75rem; font-weight: 600; cursor: pointer;
-      transition: background .15s; white-space: nowrap;
-      font-family: 'Outfit', sans-serif;
+    
+    .bulk-bar.visible { 
+      /* ---- FIX: Ripristina la visibilità quando attiva ---- */
+      transform: translateY(0); 
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
     }
     .bulk-btn:hover { background: rgba(255,255,255,.35); }
     .bulk-btn.danger { background: rgba(248,113,113,.25); border-color: rgba(248,113,113,.4); }
