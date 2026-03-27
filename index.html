@@ -166,6 +166,11 @@ function toggleTheme() {
     document.addEventListener('DOMContentLoaded', () => {
       const tt = document.querySelector('.theme-toggle');
       if (tt) tt.textContent = '☀️';
+      const logo = document.getElementById('logo-sito');
+    if (logo) {
+      logo.src = isDarkTheme ? logoTemaScuro : logoTemaChiaro;
+    }
+      
     });
   }
 })();
