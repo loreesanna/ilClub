@@ -14,7 +14,6 @@ const SB = {
       ...extra
     };
   },
-
   async get(table, query = '') {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
       headers: this.headers({ 'Accept': 'application/json' })
@@ -22,7 +21,6 @@ const SB = {
     if (!res.ok) { const e = await res.json(); throw new Error(e.message || res.status); }
     return res.json();
   },
-
   async post(table, body) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
       method: 'POST',
@@ -32,7 +30,6 @@ const SB = {
     if (!res.ok) { const e = await res.json(); throw new Error(e.message || res.status); }
     return res.json();
   },
-
   async patch(table, id, body) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
       method: 'PATCH',
@@ -42,7 +39,6 @@ const SB = {
     if (!res.ok) { const e = await res.json(); throw new Error(e.message || res.status); }
     return res.json();
   },
-
   async delete(table, id) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
       method: 'DELETE',
@@ -51,7 +47,6 @@ const SB = {
     if (!res.ok) { const e = await res.json(); throw new Error(e.message || res.status); }
     return true;
   },
-
   async signUp(email, password) {
     const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
       method: 'POST',
@@ -60,7 +55,6 @@ const SB = {
     });
     return res.json();
   },
-
   async signIn(email, password) {
     const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
       method: 'POST',
@@ -69,14 +63,12 @@ const SB = {
     });
     return res.json();
   },
-
   async signOut(token) {
     await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${token}` }
     });
   },
-
   async getUser(token) {
     const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
       headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${token}` }
@@ -89,93 +81,44 @@ const SB = {
 const AUTH = {
   currentUser: null,
   _sbToken: null,
-
   async init() {
     const saved = sessionStorage.getItem('ilclub_user');
     const token = sessionStorage.getItem('ilclub_token');
     if (saved && token) {
       this._sbToken = token;
       const sbUser = await SB.getUser(token);
-      if (!sbUser || sbUser.error) {
-        this._clear();
-        return;
-      }
+      if (!sbUser || sbUser.error) { this._clear(); return; }
       this.currentUser = JSON.parse(saved);
     }
   },
-
   _clear() {
     this.currentUser = null;
     this._sbToken = null;
     sessionStorage.removeItem('ilclub_user');
     sessionStorage.removeItem('ilclub_token');
   },
-
   async login(username, password) {
     try {
       const email = username.includes('@') ? username : `${username}@ilclub.local`;
       const data = await SB.signIn(email, password);
-      if (data.error || !data.access_token) {
-        return { ok: false, error: 'Credenziali non valide' };
-      }
+      if (data.error || !data.access_token) return { ok: false, error: 'Credenziali non valide' };
       this._sbToken = data.access_token;
       const profiles = await SB.get('profiles', `auth_id=eq.${data.user.id}&select=*`);
-      if (!profiles || profiles.length === 0) {
-        return { ok: false, error: 'Profilo utente non trovato' };
-      }
+      if (!profiles || profiles.length === 0) return { ok: false, error: 'Profilo utente non trovato' };
       const profile = profiles[0];
-      this.currentUser = {
-        id: profile.id,
-        auth_id: data.user.id,
-        name: profile.name,
-        username: profile.username,
-        role: profile.role,
-        email: data.user.email
-      };
+      this.currentUser = { id: profile.id, auth_id: data.user.id, name: profile.name, username: profile.username, role: profile.role, email: data.user.email };
       sessionStorage.setItem('ilclub_user', JSON.stringify(this.currentUser));
       sessionStorage.setItem('ilclub_token', data.access_token);
       return { ok: true, user: this.currentUser };
     } catch (err) {
-      console.error('Login error:', err);
       return { ok: false, error: 'Errore di connessione' };
     }
   },
-
   async logout() {
     if (this._sbToken) await SB.signOut(this._sbToken).catch(() => {});
     this._clear();
     window.location.href = 'login.html';
   },
-
-  async register(username, password, name) {
-    try {
-      const email = `${username}@ilclub.local`;
-      const data = await SB.signUp(email, password);
-      if (data.error) {
-        const msg = data.error.message || '';
-        if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already exists'))
-          return { ok: false, error: 'Username già in uso' };
-        return { ok: false, error: msg || 'Errore registrazione' };
-      }
-      if (!data.user && !data.id) return { ok: false, error: 'Registrazione non completata. Riprova.' };
-      const userId = data.user?.id || data.id;
-      // Usa il token della sessione appena creata (se disponibile) per inserire il profilo
-      const sessionToken = data.session?.access_token || null;
-      const savedToken = this._sbToken;
-      if (sessionToken) this._sbToken = sessionToken;
-      try {
-        await SB.post('profiles', { auth_id: userId, username, name, role: 'fan' });
-      } catch(e) {
-        console.warn('Profilo non creato via REST (serve trigger Supabase):', e.message);
-      }
-      this._sbToken = savedToken;
-      return { ok: true };
-    } catch (err) {
-      console.error('Register error:', err);
-      return { ok: false, error: 'Errore di connessione' };
-    }
-  },
-
   can(action) {
     if (!this.currentUser) return false;
     const role = this.currentUser.role;
@@ -187,25 +130,14 @@ const AUTH = {
       admin:       ['admin'],
     };
     return (perms[action] || []).includes(role);
-  },
-
-  requireAuth() {
-    if (!this.currentUser) {
-      window.location.href = 'login.html';
-      return false;
-    }
-    return true;
   }
 };
 
 const DB = {
-  async getTeam() {
-    const rows = await SB.get('team', 'select=*&limit=1');
-    return rows[0] || null;
-  },
+  async getTeam() { const r = await SB.get('team', 'select=*&limit=1'); return r[0] || null; },
   async updateTeam(data) {
-    const team = await this.getTeam();
-    if (team) { const r = await SB.patch('team', team.id, data); return r[0]; }
+    const t = await this.getTeam();
+    if (t) { const r = await SB.patch('team', t.id, data); return r[0]; }
     const r = await SB.post('team', data); return r[0];
   },
   async getPlayers() { return SB.get('players', 'select=*&order=number.asc'); },
@@ -245,6 +177,31 @@ const DB = {
   }
 };
 
+// ---- Tema — centralizzato qui, disponibile in tutte le pagine ----
+const THEME = {
+  init() {
+    const t = localStorage.getItem('ilclub_theme');
+    if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    // Aggiorna icona al primo caricamento
+    document.addEventListener('DOMContentLoaded', () => this._updateIcon());
+  },
+  toggle() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
+    localStorage.setItem('ilclub_theme', isDark ? 'light' : 'dark');
+    this._updateIcon();
+  },
+  _updateIcon() {
+    document.querySelectorAll('.theme-toggle').forEach(btn => {
+      btn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    });
+  }
+};
+THEME.init();
+
+// Esponi globalmente per gli onclick inline
+function toggleTheme() { THEME.toggle(); }
+
 const UI = {
   toast(msg, type = 'info') {
     let t = document.getElementById('toast');
@@ -253,16 +210,16 @@ const UI = {
     const icons = { success:'✓', error:'✗', info:'ℹ' };
     t.innerHTML = `<span>${icons[type]||'ℹ'}</span><span>${msg}</span>`;
     clearTimeout(t._timer);
-    t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+    t._timer = setTimeout(() => t.classList.remove('show'), 3500);
   },
   confirm(msg, cb) { if (window.confirm(msg)) cb(); },
   loading(id, message='Caricamento...') {
-    const el=document.getElementById(id);
-    if(el) el.innerHTML=`<div style="padding:2rem;text-align:center;color:var(--muted);font-size:.85rem">${message}</div>`;
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--muted);font-size:.85rem">${message}</div>`;
   },
   error(id, message='Errore nel caricamento.') {
-    const el=document.getElementById(id);
-    if(el) el.innerHTML=`<div style="padding:2rem;text-align:center;color:var(--red);font-size:.85rem">⚠ ${message}</div>`;
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--red);font-size:.85rem">⚠ ${message}</div>`;
   },
   initSidebar() {
     const u = AUTH.currentUser;

@@ -5,6 +5,76 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IL CLUB — Rosa</title>
   <link rel="stylesheet" href="./style/main.css">
+  <style>
+    /* ---- Selezione multipla ---- */
+    .player-card { position: relative; cursor: default; }
+    .player-card.selectable { cursor: pointer; }
+    .player-card.selectable:hover { border-color: var(--accent); }
+    .player-card.selected {
+      border-color: var(--accent) !important;
+      background: var(--accent-light) !important;
+      box-shadow: 0 0 0 2px var(--accent), var(--shadow-md);
+    }
+    .player-card .select-check {
+      position: absolute; top: .6rem; right: .6rem;
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid var(--border2);
+      background: var(--bg2);
+      display: none; align-items: center; justify-content: center;
+      font-size: .7rem; font-weight: 700; color: var(--accent);
+      transition: all .15s;
+    }
+    .player-card.selectable .select-check { display: flex; }
+    .player-card.selected .select-check {
+      background: var(--accent); border-color: var(--accent); color: #fff;
+    }
+
+    /* ---- Barra azione collettiva ---- */
+    .bulk-bar {
+      position: sticky; top: 56px; z-index: 90;
+      background: var(--accent); color: #fff;
+      padding: .75rem 1.25rem;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; flex-wrap: wrap;
+      border-radius: 0 0 12px 12px;
+      box-shadow: var(--shadow-md);
+      transform: translateY(-100%);
+      transition: transform .25s cubic-bezier(.4,0,.2,1);
+      margin: 0 -1.75rem;
+    }
+    .bulk-bar.visible { transform: translateY(0); }
+    .bulk-bar-info { font-size: .85rem; font-weight: 600; }
+    .bulk-bar-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .bulk-btn {
+      background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.3);
+      color: #fff; border-radius: 7px; padding: .35rem .8rem;
+      font-size: .75rem; font-weight: 600; cursor: pointer;
+      transition: background .15s; white-space: nowrap;
+      font-family: 'Outfit', sans-serif;
+    }
+    .bulk-btn:hover { background: rgba(255,255,255,.35); }
+    .bulk-btn.danger { background: rgba(248,113,113,.25); border-color: rgba(248,113,113,.4); }
+    .bulk-btn.danger:hover { background: rgba(248,113,113,.4); }
+
+    /* ---- Modal selezione multipla ---- */
+    .bulk-input-row {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .75rem; background: var(--surface2); border-radius: 8px;
+      margin-bottom: .5rem;
+    }
+    .bulk-input-row label { font-size: .8rem; color: var(--muted); min-width: 80px; }
+    .bulk-input-row input {
+      width: 80px; padding: .4rem .6rem;
+      background: var(--bg2); border: 1px solid var(--border2);
+      border-radius: 6px; color: var(--white); font-size: .875rem;
+      font-family: 'Outfit', sans-serif; outline: none;
+      transition: border-color .2s;
+    }
+    .bulk-input-row input:focus { border-color: var(--accent); }
+    .bulk-input-row .bulk-desc {
+      font-size: .73rem; color: var(--muted); flex: 1;
+    }
+  </style>
 </head>
 <body>
 <div class="app-layout">
@@ -19,27 +89,44 @@
       </div>
       <div class="topbar-actions">
         <button class="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>
-        <div id="action-bar"></div>
       </div>
     </div>
+
     <div class="page-content">
+
+      <!-- Barra azione multipla (sticky) -->
+      <div class="bulk-bar" id="bulk-bar">
+        <span class="bulk-bar-info" id="bulk-info">0 giocatori selezionati</span>
+        <div class="bulk-bar-actions">
+          <button class="bulk-btn" onclick="openBulkModal('presenze')">+ Presenze</button>
+          <button class="bulk-btn" onclick="openBulkModal('gol')">⚽ Gol</button>
+          <button class="bulk-btn" onclick="openBulkModal('ammonizioni')">🟨 Ammonizioni</button>
+          <button class="bulk-btn danger" onclick="clearSelection()">✕ Deseleziona</button>
+        </div>
+      </div>
+
       <div class="section-header fade-up">
         <div>
           <div class="section-title">Rosa della Squadra</div>
           <div class="section-subtitle">Stagione corrente · <span id="player-count">—</span> giocatori</div>
         </div>
-        <div style="display:flex;gap:.75rem;align-items:center">
+        <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
           <select class="form-select" style="width:160px" id="filter-role" onchange="renderPlayers()">
             <option value="">Tutti i ruoli</option>
             <option>Portiere</option><option>Difensore</option>
             <option>Centrocampista</option><option>Ala</option><option>Attaccante</option>
           </select>
+          <button class="btn btn-ghost btn-sm" id="select-all-btn" style="display:none" onclick="toggleSelectAll()">Seleziona tutti</button>
           <button class="btn btn-primary btn-sm" id="add-player-btn" style="display:none" onclick="openModal()">+ Aggiungi</button>
         </div>
       </div>
+
+      <!-- Grid giocatori -->
       <div class="grid-auto fade-up delay-1" id="players-grid">
         <div style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--muted)">Caricamento...</div>
       </div>
+
+      <!-- Tabella statistiche -->
       <div class="fade-up delay-2" style="margin-top:2.5rem">
         <div class="section-header">
           <div><div class="section-title" style="font-size:1.2rem">Statistiche Rosa</div></div>
@@ -49,7 +136,7 @@
             <thead>
               <tr>
                 <th>#</th><th>Giocatore</th><th>Ruolo</th><th>Età</th>
-                <th>Presenze</th><th>Gol</th><th>Assist</th>
+                <th>Presenze</th><th>Gol</th><th>🟨 Amm.</th>
                 <th id="actions-col" style="display:none">Azioni</th>
               </tr>
             </thead>
@@ -61,13 +148,14 @@
   </div>
 </div>
 
+<!-- Modal aggiungi/modifica giocatore -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div class="modal-header">
       <span class="modal-title" id="modal-title">Nuovo Giocatore</span>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-    <div id="modal-body">
+    <div>
       <div class="grid-2">
         <div class="form-group"><label class="form-label">Nome</label><input class="form-input" id="f-name" placeholder="Mario Rossi"></div>
         <div class="form-group"><label class="form-label">Numero maglia</label><input class="form-input" id="f-number" type="number" min="1" max="99"></div>
@@ -83,13 +171,46 @@
         <div class="form-group"><label class="form-label">Età</label><input class="form-input" id="f-age" type="number" min="16" max="45"></div>
       </div>
       <div class="grid-3">
-        <div class="form-group"><label class="form-label">Presenze</label><input class="form-input" id="f-matches" type="number" value="0"></div>
-        <div class="form-group"><label class="form-label">Gol</label><input class="form-input" id="f-goals" type="number" value="0"></div>
-        <div class="form-group"><label class="form-label">Assist</label><input class="form-input" id="f-assists" type="number" value="0"></div>
+        <div class="form-group"><label class="form-label">Presenze</label><input class="form-input" id="f-matches" type="number" value="0" min="0"></div>
+        <div class="form-group"><label class="form-label">Gol</label><input class="form-input" id="f-goals" type="number" value="0" min="0"></div>
+        <div class="form-group"><label class="form-label">🟨 Ammonizioni</label><input class="form-input" id="f-yellow" type="number" value="0" min="0"></div>
       </div>
       <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1rem">
         <button class="btn btn-ghost" onclick="closeModal()">Annulla</button>
         <button class="btn btn-primary" onclick="savePlayer()">Salva</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal aggiornamento collettivo -->
+<div class="modal-overlay" id="bulk-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="bulk-modal-title">Aggiorna Presenze</span>
+      <button class="modal-close" onclick="closeBulkModal()">✕</button>
+    </div>
+    <div>
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:1.25rem" id="bulk-modal-desc"></p>
+
+      <!-- Lista giocatori selezionati con input individuali -->
+      <div id="bulk-players-list" style="max-height:50vh;overflow-y:auto;margin-bottom:1.25rem"></div>
+
+      <!-- Applica a tutti -->
+      <div style="background:var(--surface2);border-radius:10px;padding:1rem;margin-bottom:1rem">
+        <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:600;margin-bottom:.75rem">
+          Imposta valore uguale per tutti
+        </div>
+        <div style="display:flex;gap:.75rem;align-items:center">
+          <input class="form-input" id="bulk-apply-val" type="number" min="0" placeholder="es. 1"
+                 style="width:100px" oninput="applyToAll(this.value)">
+          <span style="font-size:.8rem;color:var(--muted)">→ aggiunge questo valore a tutti i selezionati</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:.75rem;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="closeBulkModal()">Annulla</button>
+        <button class="btn btn-primary" onclick="saveBulk()" id="bulk-save-btn">Salva</button>
       </div>
     </div>
   </div>
@@ -101,14 +222,19 @@
 <script>
 let editingId = null;
 let allPlayers = [];
+let selectedIds = new Set();
+let bulkField = null; // 'matches' | 'goals' | 'yellow_cards'
+let canEdit = false;
+
 const roleColors = { Portiere:'blue', Difensore:'green', Centrocampista:'gold', Ala:'gold', Attaccante:'red' };
 
 document.addEventListener('DOMContentLoaded', async () => {
   await AUTH.init();
-  const canEdit = AUTH.can('editPlayer');
+  canEdit = AUTH.can('editPlayer');
   if (canEdit) {
     document.getElementById('add-player-btn').style.display = '';
     document.getElementById('actions-col').style.display = '';
+    document.getElementById('select-all-btn').style.display = '';
   }
   try {
     allPlayers = await DB.getPlayers();
@@ -118,10 +244,57 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderPlayers();
 });
 
+// ---- Selezione ----
+function toggleSelect(id) {
+  if (!canEdit) return;
+  if (selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  updateSelectionUI();
+}
+
+function clearSelection() {
+  selectedIds.clear();
+  updateSelectionUI();
+}
+
+function toggleSelectAll() {
+  const filter = document.getElementById('filter-role').value;
+  const visible = filter ? allPlayers.filter(p => p.role === filter) : allPlayers;
+  if (selectedIds.size === visible.length) {
+    clearSelection();
+  } else {
+    visible.forEach(p => selectedIds.add(p.id));
+    updateSelectionUI();
+  }
+}
+
+function updateSelectionUI() {
+  const count = selectedIds.size;
+  const bulkBar = document.getElementById('bulk-bar');
+  bulkBar.classList.toggle('visible', count > 0);
+  document.getElementById('bulk-info').textContent =
+    count === 1 ? '1 giocatore selezionato' : `${count} giocatori selezionati`;
+
+  // Aggiorna stile card
+  document.querySelectorAll('.player-card').forEach(card => {
+    const id = +card.dataset.id;
+    card.classList.toggle('selected', selectedIds.has(id));
+    const check = card.querySelector('.select-check');
+    if (check) check.textContent = selectedIds.has(id) ? '✓' : '';
+  });
+
+  // Tasto seleziona tutti
+  const btn = document.getElementById('select-all-btn');
+  const filter = document.getElementById('filter-role').value;
+  const visible = filter ? allPlayers.filter(p => p.role === filter) : allPlayers;
+  btn.textContent = selectedIds.size === visible.length && visible.length > 0
+    ? 'Deseleziona tutti' : 'Seleziona tutti';
+}
+
+// ---- Render giocatori ----
 function renderPlayers() {
   const filter = document.getElementById('filter-role').value;
   const filtered = filter ? allPlayers.filter(p => p.role === filter) : allPlayers;
-  const canEdit = AUTH.can('editPlayer');
   document.getElementById('player-count').textContent = filtered.length;
 
   const groups = {};
@@ -134,23 +307,29 @@ function renderPlayers() {
       <div style="flex:1;height:1px;background:var(--border)"></div>
     </div>`;
     ps.forEach(p => {
-      gridHtml += `<div class="player-card">
+      const isSelected = selectedIds.has(p.id);
+      gridHtml += `<div class="player-card ${canEdit ? 'selectable' : ''} ${isSelected ? 'selected' : ''}"
+                        data-id="${p.id}" onclick="${canEdit ? `toggleSelect(${p.id})` : ''}">
+        ${canEdit ? `<div class="select-check">${isSelected ? '✓' : ''}</div>` : ''}
         <div class="player-number">${p.number}</div>
         <div class="player-name">${p.name}</div>
         <div class="player-role">${p.role}</div>
-        <div style="display:flex;justify-content:center;gap:1.5rem;margin-top:1rem;font-size:.78rem;color:var(--muted)">
-          <span><strong style="color:var(--white)">${p.goals||0}</strong> Gol</span>
-          <span><strong style="color:var(--white)">${p.assists||0}</strong> Ast</span>
-          <span><strong style="color:var(--white)">${p.matches||0}</strong> Pres</span>
+        <div style="display:flex;justify-content:center;gap:1.25rem;margin-top:1rem;font-size:.78rem;color:var(--muted)">
+          <span title="Presenze"><strong style="color:var(--white)">${p.matches||0}</strong> Pres</span>
+          <span title="Gol"><strong style="color:var(--white)">${p.goals||0}</strong> ⚽</span>
+          <span title="Ammonizioni"><strong style="color:var(--white)">${p.yellow_cards||0}</strong> 🟨</span>
         </div>
-        ${canEdit ? `<button class="btn btn-ghost btn-sm" style="margin-top:1rem;width:100%" onclick="editPlayer(${p.id})">Modifica</button>` : ''}
+        ${canEdit ? `<button class="btn btn-ghost btn-sm" style="margin-top:1rem;width:100%"
+                      onclick="event.stopPropagation();editPlayer(${p.id})">Modifica</button>` : ''}
       </div>`;
     });
   });
   if (!gridHtml) gridHtml = `<div style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--muted)">Nessun giocatore trovato</div>`;
   document.getElementById('players-grid').innerHTML = gridHtml;
 
-  document.getElementById('players-table').innerHTML = [...filtered].sort((a,b)=>a.number-b.number).map(p=>`
+  // Tabella
+  document.getElementById('players-table').innerHTML = [...filtered]
+    .sort((a,b) => a.number - b.number).map(p => `
     <tr>
       <td><strong style="color:var(--gold)">${p.number}</strong></td>
       <td><strong>${p.name}</strong></td>
@@ -158,67 +337,44 @@ function renderPlayers() {
       <td>${p.age||'—'}</td>
       <td>${p.matches||0}</td>
       <td><strong>${p.goals||0}</strong></td>
-      <td>${p.assists||0}</td>
+      <td>${p.yellow_cards||0}</td>
       ${canEdit ? `<td>
         <button class="btn btn-ghost btn-sm" onclick="editPlayer(${p.id})">✏</button>
         <button class="btn btn-danger btn-sm" onclick="deletePlayer(${p.id})" style="margin-left:.5rem">✕</button>
       </td>` : ''}
-    </tr>
-  `).join('');
+    </tr>`).join('');
 }
 
+// ---- Modal singolo giocatore ----
 function openModal(player=null) {
   editingId = player ? player.id : null;
   document.getElementById('modal-title').textContent = player ? 'Modifica Giocatore' : 'Nuovo Giocatore';
-  document.getElementById('f-name').value = player?.name || '';
-  document.getElementById('f-number').value = player?.number || '';
-  document.getElementById('f-role').value = player?.role || 'Portiere';
-  document.getElementById('f-age').value = player?.age || '';
-  document.getElementById('f-matches').value = player?.matches ?? 0;
-  document.getElementById('f-goals').value = player?.goals ?? 0;
-  document.getElementById('f-assists').value = player?.assists ?? 0;
+  document.getElementById('f-name').value    = player?.name   || '';
+  document.getElementById('f-number').value  = player?.number || '';
+  document.getElementById('f-role').value    = player?.role   || 'Portiere';
+  document.getElementById('f-age').value     = player?.age    || '';
+  document.getElementById('f-matches').value = player?.matches     ?? 0;
+  document.getElementById('f-goals').value   = player?.goals       ?? 0;
+  document.getElementById('f-yellow').value  = player?.yellow_cards ?? 0;
   document.getElementById('modal').classList.add('open');
 }
-
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function editPlayer(id) { const p = allPlayers.find(p => p.id === id); if (p) openModal(p); }
 
-function editPlayer(id) {
-  const p = allPlayers.find(p => p.id === id);
-  if (p) openModal(p);
-}
-
-function toggleTheme() {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
-  localStorage.setItem('ilclub_theme', isDark ? 'light' : 'dark');
-  document.querySelector('.theme-toggle').textContent = isDark ? '🌙' : '☀️';
-}
-(function(){
-  const t = localStorage.getItem('ilclub_theme');
-  if (t === 'dark') {
-    document.documentElement.setAttribute('data-theme','dark');
-    document.addEventListener('DOMContentLoaded', () => {
-      const tt = document.querySelector('.theme-toggle');
-      if (tt) tt.textContent = '☀️';
-    });
-  }
-})();
-
-  
 async function savePlayer() {
   const data = {
-    name: document.getElementById('f-name').value.trim(),
-    number: +document.getElementById('f-number').value,
-    role: document.getElementById('f-role').value,
-    age: +document.getElementById('f-age').value,
-    matches: +document.getElementById('f-matches').value,
-    goals: +document.getElementById('f-goals').value,
-    assists: +document.getElementById('f-assists').value,
+    name:         document.getElementById('f-name').value.trim(),
+    number:       +document.getElementById('f-number').value,
+    role:         document.getElementById('f-role').value,
+    age:          +document.getElementById('f-age').value || null,
+    matches:      +document.getElementById('f-matches').value,
+    goals:        +document.getElementById('f-goals').value,
+    yellow_cards: +document.getElementById('f-yellow').value,
   };
   if (!data.name || !data.number) { UI.toast('Compila nome e numero', 'error'); return; }
   try {
     if (editingId) {
-      const updated = await DB.updatePlayer(editingId, data);
+      await DB.updatePlayer(editingId, data);
       const idx = allPlayers.findIndex(p => p.id === editingId);
       if (idx > -1) allPlayers[idx] = { ...allPlayers[idx], ...data };
       UI.toast('Giocatore aggiornato', 'success');
@@ -229,9 +385,7 @@ async function savePlayer() {
     }
     closeModal();
     renderPlayers();
-  } catch(e) {
-    UI.toast('Errore: ' + e.message, 'error');
-  }
+  } catch(e) { UI.toast('Errore: ' + e.message, 'error'); }
 }
 
 async function deletePlayer(id) {
@@ -239,12 +393,105 @@ async function deletePlayer(id) {
     try {
       await DB.deletePlayer(id);
       allPlayers = allPlayers.filter(p => p.id !== id);
+      selectedIds.delete(id);
       UI.toast('Giocatore rimosso', 'info');
       renderPlayers();
-    } catch(e) {
-      UI.toast('Errore: ' + e.message, 'error');
+      updateSelectionUI();
+    } catch(e) { UI.toast('Errore: ' + e.message, 'error'); }
+  });
+}
+
+// ---- Modal aggiornamento collettivo ----
+const fieldLabels = {
+  presenze:     { field: 'matches',      icon: '📋', label: 'Presenze',      unit: 'presenze' },
+  gol:          { field: 'goals',        icon: '⚽', label: 'Gol',           unit: 'gol' },
+  ammonizioni:  { field: 'yellow_cards', icon: '🟨', label: 'Ammonizioni',   unit: 'ammonizioni' },
+};
+
+function openBulkModal(type) {
+  const cfg = fieldLabels[type];
+  bulkField = cfg.field;
+
+  document.getElementById('bulk-modal-title').textContent = `${cfg.icon} Aggiorna ${cfg.label}`;
+  document.getElementById('bulk-modal-desc').textContent =
+    `Inserisci quante ${cfg.unit} aggiungere per ciascun giocatore selezionato. Puoi personalizzare il valore per ogni giocatore.`;
+
+  const selected = allPlayers.filter(p => selectedIds.has(p.id));
+  document.getElementById('bulk-players-list').innerHTML = selected.map(p => `
+    <div class="bulk-input-row">
+      <label><strong style="color:var(--navy)">${p.name.split(' ').pop()}</strong><br>
+        <span style="font-size:.7rem;color:var(--muted)">#${p.number} · ${p.role}</span>
+      </label>
+      <input type="number" min="0" value="1" id="bulk-val-${p.id}" placeholder="+">
+      <span class="bulk-desc">
+        Attuale: <strong>${p[cfg.field]||0}</strong> → Nuovo: <strong id="bulk-preview-${p.id}">${(p[cfg.field]||0)+1}</strong>
+      </span>
+    </div>`).join('');
+
+  // Aggiorna preview in tempo reale
+  selected.forEach(p => {
+    const inp = document.getElementById(`bulk-val-${p.id}`);
+    if (inp) inp.addEventListener('input', () => {
+      const preview = document.getElementById(`bulk-preview-${p.id}`);
+      if (preview) preview.textContent = (p[bulkField === 'matches' ? 'matches' : bulkField === 'goals' ? 'goals' : 'yellow_cards']||0) + (+inp.value||0);
+    });
+  });
+
+  document.getElementById('bulk-apply-val').value = '';
+  document.getElementById('bulk-modal').classList.add('open');
+}
+
+function applyToAll(val) {
+  const selected = allPlayers.filter(p => selectedIds.has(p.id));
+  selected.forEach(p => {
+    const inp = document.getElementById(`bulk-val-${p.id}`);
+    const preview = document.getElementById(`bulk-preview-${p.id}`);
+    if (inp) inp.value = val;
+    if (preview) {
+      const currentVal = p[bulkField] || 0;
+      preview.textContent = currentVal + (+val || 0);
     }
   });
+}
+
+function closeBulkModal() {
+  document.getElementById('bulk-modal').classList.remove('open');
+  document.getElementById('bulk-apply-val').value = '';
+  bulkField = null;
+}
+
+async function saveBulk() {
+  if (!bulkField) return;
+  const selected = allPlayers.filter(p => selectedIds.has(p.id));
+  const btn = document.getElementById('bulk-save-btn');
+  btn.disabled = true; btn.textContent = 'Salvataggio...';
+
+  let errors = 0;
+  for (const p of selected) {
+    const inp = document.getElementById(`bulk-val-${p.id}`);
+    const addVal = +(inp?.value || 0);
+    if (addVal === 0) continue;
+
+    const currentVal = p[bulkField] || 0;
+    const newVal = currentVal + addVal;
+    try {
+      await DB.updatePlayer(p.id, { [bulkField]: newVal });
+      const idx = allPlayers.findIndex(x => x.id === p.id);
+      if (idx > -1) allPlayers[idx][bulkField] = newVal;
+    } catch(e) {
+      errors++;
+      console.error('Errore aggiornamento', p.name, e);
+    }
+  }
+
+  btn.disabled = false; btn.textContent = 'Salva';
+  closeBulkModal();
+
+  if (errors > 0) UI.toast(`${errors} errori durante il salvataggio`, 'error');
+  else UI.toast(`${selected.length} giocatori aggiornati`, 'success');
+
+  clearSelection();
+  renderPlayers();
 }
 </script>
 </body>

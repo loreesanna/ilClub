@@ -147,18 +147,7 @@
 const CIRC = 2 * Math.PI * 48; // ≈ 301.6
 
 // ---- Tema ----
-function toggleTheme() {
-  const logoTemaChiaro = "./style/img/logov2.png"
-  const logoTemaScuro = "./style/img/image.png"
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
-  localStorage.setItem('ilclub_theme', isDark ? 'light' : 'dark');
-  document.querySelector('.theme-toggle').textContent = isDark ? '🌙' : '☀️';
-  const logo = document.getElementById('logo-sito');
-  if (logo) {
-    logo.src = isDark ? logoTemaChiaro : logoTemaScuro;
-  }
-}
+
 (function(){
   const t = localStorage.getItem('ilclub_theme');
   if (t === 'dark') {
@@ -166,11 +155,6 @@ function toggleTheme() {
     document.addEventListener('DOMContentLoaded', () => {
       const tt = document.querySelector('.theme-toggle');
       if (tt) tt.textContent = '☀️';
-      const logo = document.getElementById('logo-sito');
-    if (logo) {
-      logo.src = isDarkTheme ? logoTemaScuro : logoTemaChiaro;
-    }
-      
     });
   }
 })();

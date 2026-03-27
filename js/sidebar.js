@@ -2,11 +2,10 @@
 (function() {
   const current = window.location.pathname.split('/').pop() || 'index.html';
 
-  // ---- SIDEBAR HTML ----
   const sidebarHtml = `
   <aside class="sidebar" id="sidebar">
     <a href="index.html" class="sidebar-logo">
-      <img id = "logo-sito" src="../style/img/logov2.png" alt="IL CLUB Logo">
+      <img src="./style/img/logov2.png" alt="IL CLUB Logo">
       <div class="sidebar-logo-text">
         <span class="brand">IL CLUB</span>
         <span class="tagline">Football Society</span>
@@ -36,7 +35,7 @@
     </nav>
     <div class="sidebar-footer">
       <div class="user-chip" id="user-chip-btn" title="Clicca per uscire">
-        <div class="user-avatar" id="user-avatar"><img src = "../style/img/user-4-16.png"></div>
+        <div class="user-avatar" id="user-avatar">?</div>
         <div class="user-info">
           <div class="user-name" id="user-name">—</div>
           <div class="user-role" id="user-role"></div>
@@ -51,9 +50,22 @@
   </aside>
   <div id="sidebar-overlay" onclick="closeSidebar()"></div>`;
 
-  // ---- BOTTOM NAV HTML ----
-  const bottomNavHtml = `
-  <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+  // Inject sidebar
+  const target = document.getElementById('sidebar-mount');
+  if (target) {
+    target.innerHTML = sidebarHtml;
+    UI.initSidebar();
+    document.getElementById('user-chip-btn').addEventListener('click', () => {
+      if (AUTH.currentUser) { if (confirm('Vuoi uscire?')) AUTH.logout(); }
+      else window.location.href = 'login.html';
+    });
+  }
+
+  // ---- BOTTOM NAV ----
+  const nav = document.createElement('nav');
+  nav.className = 'mobile-bottom-nav';
+  nav.id = 'mobile-bottom-nav';
+  nav.innerHTML = `
     <a href="index.html" ${current==='index.html'?'class="active"':''}>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
       <span>Home</span>
@@ -73,28 +85,10 @@
     <a href="storia.html" id="bn-last" ${current==='storia.html'?'class="active"':''}>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       <span>Storia</span>
-    </a>
-  </nav>`;
+    </a>`;
+  document.body.appendChild(nav);
 
-  // Inject sidebar
-  const target = document.getElementById('sidebar-mount');
-  if (target) {
-    target.innerHTML = sidebarHtml;
-    UI.initSidebar();
-    document.getElementById('user-chip-btn').addEventListener('click', () => {
-      if (AUTH.currentUser) { if (confirm('Vuoi uscire?')) AUTH.logout(); }
-      else window.location.href = 'login.html';
-    });
-  }
-
-  // Inject bottom nav in body
-  const bnEl = document.createElement('nav');
-  bnEl.className = 'mobile-bottom-nav';
-  bnEl.id = 'mobile-bottom-nav';
-  bnEl.innerHTML = document.createRange().createContextualFragment(bottomNavHtml).querySelector('nav').innerHTML;
-  document.body.appendChild(bnEl);
-
-  // Aggiorna ultimo link bottom nav se admin
+  // Se admin, aggiorna ultimo tab
   setTimeout(() => {
     if (AUTH.can('admin')) {
       const last = document.getElementById('bn-last');
@@ -113,7 +107,7 @@ function toggleSidebar() {
   const o = document.getElementById('sidebar-overlay');
   if (!s) return;
   const open = s.classList.toggle('open');
-  o.classList.toggle('visible', open);
+  if (o) o.classList.toggle('visible', open);
 }
 function closeSidebar() {
   const s = document.getElementById('sidebar');
