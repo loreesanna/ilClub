@@ -190,7 +190,6 @@ const THEME = {
     document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
     localStorage.setItem('ilclub_theme', isDark ? 'light' : 'dark');
     this._updateIcon();
-     updateSidebarLogo();
   },
   _updateIcon() {
     document.querySelectorAll('.theme-toggle').forEach(btn => {
