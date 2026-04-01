@@ -190,6 +190,11 @@ const THEME = {
     document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
     localStorage.setItem('ilclub_theme', isDark ? 'light' : 'dark');
     this._updateIcon();
+    // Aggiorna il logo al cambio tema
+    const logoImg = document.getElementById('sidebar-logo-img');
+    if (logoImg) {
+      logoImg.src = isDark ? './style/img/logov2.png' : './style/img/image.png';
+    }
   },
   _updateIcon() {
     document.querySelectorAll('.theme-toggle').forEach(btn => {
