@@ -193,7 +193,7 @@ const THEME = {
     // Aggiorna il logo al cambio tema
     const logoImg = document.getElementById('sidebar-logo-img');
     if (logoImg) {
-      logoImg.src = isDark ? './style/img/logov2.png' : './style/img/image.png';
+      logoImg.src = isDark ?  './style/img/image.png' : './style/img/logov2.png';
     }
   },
   _updateIcon() {
