@@ -3,7 +3,7 @@
     const logoImg = document.getElementById('sidebar-logo-img');
     if (!logoImg) return;
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    logoImg.src = isDark ? './style/img/logov2-dark.png' : './style/img/logov2.png';
+    logoImg.src = isDark ? './style/img/image.png' : './style/img/logov2.png';
   }
 
 (function() {
