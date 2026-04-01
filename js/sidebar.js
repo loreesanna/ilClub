@@ -1,4 +1,11 @@
 // sidebar.js — sidebar desktop + bottom nav mobile
+  function updateSidebarLogo() {
+    const logoImg = document.getElementById('sidebar-logo-img');
+    if (!logoImg) return;
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    logoImg.src = isDark ? './style/img/logov2-dark.png' : './style/img/logov2.png';
+  }
+
 (function() {
   const current = window.location.pathname.split('/').pop() || 'index.html';
 
@@ -8,10 +15,9 @@
   const sidebarHtml = `
   <aside class="sidebar" id="sidebar">
     <a href="index.html" class="sidebar-logo">
-      <img src="${logoSrc}" alt="IL CLUB Logo">
+      <img src="./style/img/logov2.png" alt="IL CLUB Logo" id = "sidebar-logo-img">
       <div class="sidebar-logo-text">
         <span class="brand">IL CLUB</span>
-        <span class="tagline">Football Society</span>
       </div>
     </a>
     <nav class="sidebar-nav">
@@ -54,9 +60,12 @@
   <div id="sidebar-overlay" onclick="closeSidebar()"></div>`;
 
   // Inject sidebar
+
+  
   const target = document.getElementById('sidebar-mount');
   if (target) {
     target.innerHTML = sidebarHtml;
+    updateSidebarLogo();
     UI.initSidebar();
     document.getElementById('user-chip-btn').addEventListener('click', () => {
       if (AUTH.currentUser) { if (confirm('Vuoi uscire?')) AUTH.logout(); }
