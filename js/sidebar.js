@@ -2,14 +2,13 @@
 (function() {
   const current = window.location.pathname.split('/').pop() || 'index.html';
 
- 
-  
   const sidebarHtml = `
   <aside class="sidebar" id="sidebar">
     <a href="index.html" class="sidebar-logo">
       <img src="./style/img/logov2.png" alt="IL CLUB Logo">
       <div class="sidebar-logo-text">
         <span class="brand">IL CLUB</span>
+        <span class="tagline">Football Society</span>
       </div>
     </a>
     <nav class="sidebar-nav">
