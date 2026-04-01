@@ -124,7 +124,7 @@ body {
   object-fit:contain;flex-shrink:0;
 }
 [data-theme="dark"] .sidebar-logo img{
-  filter:brightness(0) invert(1) opacity(.9);
+  filter:none;
 }
 
 .sidebar-logo-text .brand{

@@ -2,13 +2,16 @@
 (function() {
   const current = window.location.pathname.split('/').pop() || 'index.html';
 
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const srcImg = isDark ? '../style/img/logov2.png' : '../style/img/image.png';
+  
+
   const sidebarHtml = `
   <aside class="sidebar" id="sidebar">
     <a href="index.html" class="sidebar-logo">
-      <img src="./style/img/logov2.png" alt="IL CLUB Logo">
+      <img src="${srcImg}" alt="IL CLUB Logo">
       <div class="sidebar-logo-text">
         <span class="brand">IL CLUB</span>
-        <span class="tagline">Football Society</span>
       </div>
     </a>
     <nav class="sidebar-nav">
@@ -35,7 +38,7 @@
     </nav>
     <div class="sidebar-footer">
       <div class="user-chip" id="user-chip-btn" title="Clicca per uscire">
-        <div class="user-avatar" id="user-avatar">?</div>
+        <div class="user-avatar" id="user-avatar"><img src = "../style/img/user-4-16.png"></div>
         <div class="user-info">
           <div class="user-name" id="user-name">—</div>
           <div class="user-role" id="user-role"></div>
